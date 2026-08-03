@@ -1,0 +1,9 @@
+{
+  "name": "esp32-s3-lcd-1.47-lab",
+  "version": "0.1.0-alpha",
+  "target": "Waveshare ESP32-S3-LCD-1.47 USB-A",
+  "framework": "Arduino-ESP32 3.x",
+  "build": "PlatformIO / pioarduino",
+  "created": "2026-08-03",
+  "hardware_tested": false
+}
