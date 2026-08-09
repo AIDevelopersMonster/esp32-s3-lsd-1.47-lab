@@ -71,6 +71,8 @@ Waveshare требует пакет ESP32 версии не ниже 3.0.2.
   проверка размера backup, SHA-256 и основные операции `esptool`;
 - [docs/firmware-backup.md](docs/firmware-backup.md) — процедура сохранения
   заводской прошивки;
+- [Видео: сохранение заводской прошивки ESP32-S3-LCD-1.47](https://youtube.com/shorts/AqG7NoXsGEw)
+  — реальный процесс полного backup Flash через `esptool --no-stub`;
 - [tools/backup-factory.ps1](tools/backup-factory.ps1) — полный read-only backup
   Flash;
 - [tools/read-efuses.ps1](tools/read-efuses.ps1) — read-only снимок eFuse в
