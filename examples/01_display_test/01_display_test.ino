@@ -14,6 +14,15 @@
     It intentionally avoids LVGL, microSD, Wi-Fi and other peripherals so the
     LCD path can be tested independently.
 
+  Verified on hardware:
+    Successfully compiled, uploaded and tested on a physical
+    Waveshare ESP32-S3-LCD-1.47. Arduino/esptool reported successful write
+    verification ("Hash of data verified"), and the LCD displayed
+    "Display test OK" as expected.
+
+  Video proof:
+    https://youtube.com/shorts/Xg4yZbiRnrQ
+
   Required Arduino libraries:
     - SPI                         (included with the ESP32 Arduino core)
     - Adafruit GFX Library
