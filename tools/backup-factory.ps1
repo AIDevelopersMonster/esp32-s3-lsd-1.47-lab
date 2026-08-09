@@ -95,7 +95,7 @@ $repositoryRoot = Split-Path -Parent $PSScriptRoot
 if ([string]::IsNullOrWhiteSpace($Output)) {
     $Output = Join-Path $repositoryRoot "backup\esp32-s3-lcd-1.47-factory.bin"
 }
-elif (-not [System.IO.Path]::IsPathRooted($Output)) {
+elseif (-not [System.IO.Path]::IsPathRooted($Output)) {
     $Output = Join-Path $repositoryRoot $Output
 }
 
