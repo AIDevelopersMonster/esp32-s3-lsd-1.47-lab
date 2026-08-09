@@ -29,10 +29,13 @@
     Serial transfer speed used by esptool while reading flash.
 
     Default:
-        115200
+        9600
 
-    This conservative default was chosen after full-flash reads at 460800 and
-    230400 both stopped during a long transfer on the tested board/PC setup.
+    This deliberately very conservative diagnostic default was selected after
+    full-flash reads at 460800 and 230400 both stopped at approximately the
+    same transfer point on the tested board/PC setup. It trades speed for the
+    cleanest possible serial-transfer experiment.
+
     Higher speeds can still be requested explicitly when the connection is
     known to be stable.
 
@@ -57,7 +60,7 @@
     powershell.exe -ExecutionPolicy Bypass -File .\tools\backup-factory.ps1 -Port COM16
 
 .EXAMPLE
-    .\tools\backup-factory.ps1 -Port COM16 -Baud 230400
+    .\tools\backup-factory.ps1 -Port COM16 -Baud 115200
 
 .REQUIREMENTS
     - Windows PowerShell or PowerShell 7
@@ -82,7 +85,7 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$Port,
 
-    [int]$Baud = 115200,
+    [int]$Baud = 9600,
 
     [string]$Output = "",
 
