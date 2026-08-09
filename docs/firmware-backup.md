@@ -130,7 +130,7 @@ This reads the complete physical Flash from `0x00000000` through the end of the
 16 MiB device.
 
 The ROM-bootloader method is slower than a normal stub-based read. On the tested
-setup, the successful complete read took about 39 minutes. For a one-time
+setup, successful complete reads took roughly 40–55 minutes. For a one-time
 factory backup, reliability is more important than transfer speed.
 
 ## Verify the result manually
@@ -190,6 +190,22 @@ For this repository, `backup\esp32-s3-lcd-1.47-factory.bin` is the canonical
 local factory-backup filename, and the two `nostub` images served as independent
 verification copies.
 
+## How to restore the factory firmware later
+
+The recovery procedure is intentionally kept in a separate document because
+backup is read-only while restore **writes and overwrites Flash**:
+
+**[Restore the saved factory firmware](firmware-restore.md)**
+
+That guide starts by checking the 16 MiB file size and SHA-256 before any write,
+then describes writing the complete raw image back at Flash offset `0x00000000`
+and performing a strong post-restore full-image verification.
+
+The backup procedure on this page is hardware-verified. The full restore path is
+documented but should not be called hardware-verified until the first complete
+restore, reboot and read-back comparison have been performed on the physical
+board.
+
 ## After the backup
 
 The verified command intentionally uses:
@@ -230,3 +246,5 @@ These files are also covered by the repository's `backup/` Git ignore rule.
 - Do not assume an interrupted output file is a valid backup just because it exists.
 - A valid full backup for this verified 16 MiB board must contain exactly `16777216` bytes.
 - Preserve the SHA-256 checksum together with the backup metadata.
+- Before any restore, follow [firmware-restore.md](firmware-restore.md) and verify
+  the intended image before issuing `write-flash`.
