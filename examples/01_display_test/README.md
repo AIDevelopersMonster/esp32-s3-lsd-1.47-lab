@@ -14,6 +14,20 @@ RGB-светодиод. Его задача — проверить, что Ardui
 - зелёная рамка;
 - надпись `Display test OK` жёлтым цветом.
 
+## Проверено на реальной плате
+
+Этот пример успешно собран, загружен через Arduino IDE и проверен на физическом
+экземпляре **Waveshare ESP32-S3-LCD-1.47**.
+
+При загрузке Arduino/esptool записал sketch в Flash, выполнил проверку записанных
+данных (`Hash of data verified`) и автоматически перезапустил ESP32-S3 через RTS.
+После запуска дисплей корректно показал тестовую графику и сообщение
+`Display test OK`.
+
+Видео-подтверждение работы примера:
+
+**[YouTube Shorts — ESP32-S3-LCD-1.47 Display Test OK](https://youtube.com/shorts/Xg4yZbiRnrQ)**
+
 ## Перед первой прошивкой
 
 Если на плате ещё сохранена заводская прошивка Waveshare, сначала рекомендуется
@@ -305,6 +319,7 @@ tft.setRotation(0);
 
 ## Связанные материалы
 
+- [Видео: работа display test на реальной плате](https://youtube.com/shorts/Xg4yZbiRnrQ)
 - [Arduino IDE setup](../../docs/arduino-ide.md)
 - [Pinout](../../docs/pinout.md)
 - [Factory firmware backup](../../docs/firmware-backup.md)
