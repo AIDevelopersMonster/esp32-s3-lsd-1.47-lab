@@ -156,6 +156,40 @@ Get-FileHash .\backup\esp32-s3-lcd-1.47-factory.bin -Algorithm SHA256
 Keep the `.bin` file and its SHA-256 checksum in at least two separate physical
 or cloud locations.
 
+## Verified factory image fingerprint for the tested board
+
+Three independent complete 16 MiB reads of the same physical board were made:
+
+```text
+esp32-s3-lcd-1.47-factory-nostub1.bin
+esp32-s3-lcd-1.47-factory-nostub2.bin
+esp32-s3-lcd-1.47-factory.bin
+```
+
+All three files were exactly `16777216` bytes and produced the same SHA-256:
+
+```text
+E4CD5C150C4C90C3D0DE1DB375BFAF882CFB4A97776B5C7E17A45758D49BCA00
+```
+
+The pairwise comparisons were all identical:
+
+```text
+nostub1 == nostub2 : True
+nostub1 == ps1     : True
+nostub2 == ps1     : True
+```
+
+This fingerprint is the verified factory image hash for **this specific physical
+board** and this captured factory state. It is not a universal hash for every
+Waveshare ESP32-S3-LCD-1.47 board; another unit, firmware revision, calibration
+state, or device-specific Flash content may legitimately produce a different
+SHA-256.
+
+For this repository, `backup\esp32-s3-lcd-1.47-factory.bin` is the canonical
+local factory-backup filename, and the two `nostub` images served as independent
+verification copies.
+
 ## After the backup
 
 The verified command intentionally uses:
