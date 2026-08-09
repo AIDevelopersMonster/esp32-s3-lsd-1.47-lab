@@ -16,6 +16,12 @@ Monitor Arduino IDE** на скорости **115200 baud**.
 - показывает имена файлов и папок;
 - ничего не создаёт, не удаляет и не форматирует.
 
+## Видео-подтверждение
+
+Реальный запуск этого примера на физической плате:
+
+**[YouTube Shorts — ESP32-S3-LCD-1.47 microSD / SD_MMC test](https://youtube.com/shorts/eVARX5pUqp4)**
+
 ---
 
 # Коротко: что нужно сделать
@@ -478,6 +484,7 @@ No files were changed.
 
 # Связанные материалы
 
+- [Видео: microSD / SD_MMC test на реальной плате](https://youtube.com/shorts/eVARX5pUqp4)
 - [Arduino IDE setup](../../docs/arduino-ide.md)
 - [Pinout](../../docs/pinout.md)
 - [Factory firmware backup](../../docs/firmware-backup.md)
