@@ -12,15 +12,40 @@ The matching backup procedure is here:
 > Flash. Do not run the restore command until the backup file has been checked
 > for the expected size and SHA-256.
 
-## Important status
+## Hardware-verified status
 
-The backup path is already hardware-verified on the physical project board.
-The restore procedure below follows Espressif's documented `write-flash`
-semantics for writing a binary at a specified Flash offset, but **this exact
-full 16 MiB restore has not yet been hardware-verified in this project**.
+The complete 16 MiB factory-image restore has now been performed successfully on
+the physical project board with **esptool v5.3.1**.
 
-Until a real restore-and-boot test is completed, treat this page as the prepared
-recovery procedure rather than a hardware-verified recovery result.
+The verified restore wrote the canonical image from Flash offset `0x00000000`
+through `0x00ffffff` and esptool reported:
+
+```text
+Flash will be erased from 0x00000000 to 0x00ffffff...
+Wrote 16777216 bytes (1018650 compressed) at 0x00000000 in 99.9 seconds.
+Hash of data verified.
+Hard resetting via RTS pin...
+```
+
+The board's factory firmware was restored successfully after the reset.
+
+This establishes the **restore/write path as hardware-verified** for the tested
+board and saved image.
+
+A separate full 16 MiB post-restore read-back and SHA-256 comparison remains the
+strongest optional byte-for-byte verification. It is not required to call the
+restore successful because esptool already verified the data it programmed, but
+it can provide an independent end-to-end confirmation of the entire Flash image.
+
+### Important observation about the flasher stub
+
+Full Flash **reads** through the normal flasher stub were unreliable on this
+board and repeatedly stopped near `0x00158000`, which is why factory backup uses
+`--no-stub`.
+
+The full 16 MiB **write**, however, succeeded with the normal esptool flasher
+stub and passed esptool's data-hash verification. Therefore the observed stub
+problem should not be generalized from reads to writes.
 
 ## What the backup contains
 
@@ -135,7 +160,7 @@ Replace `COM16` below with the actual port.
 
 ## 6. Confirm esptool is available
 
-The project used esptool v5.3.1 during the backup work.
+The project used esptool v5.3.1 during the verified backup and restore work.
 
 Check the installed version:
 
@@ -151,9 +176,7 @@ py -m esptool write-flash -h
 
 ## 7. Restore the complete raw Flash image
 
-Espressif's `write-flash` command takes pairs of Flash offsets and binary files.
-Because this backup begins at Flash offset zero and contains the complete raw
-Flash image, the prepared restore command is:
+The command hardware-verified on the project board is:
 
 ```powershell
 py -m esptool `
@@ -162,6 +185,8 @@ py -m esptool `
     write-flash `
     0x0 .\backup\esp32-s3-lcd-1.47-factory.bin
 ```
+
+Replace `COM16` with the actual port.
 
 This is the **destructive step**. esptool erases the Flash sectors covered by the
 write and programs the supplied image into them.
@@ -172,30 +197,36 @@ already erases the sectors it needs before programming them.
 ### Why no explicit `--flash-mode` or `--flash-size` override is used
 
 For an exact saved image, the restore command intentionally avoids forcing new
-Flash mode/size header values. Espressif documents that these options are not
-normally required and that forcing them can update the boot image header.
+Flash mode/size header values. The goal is to write back the captured raw image
+rather than reinterpret it with new build-time settings.
 
-The goal here is to write back the captured raw image rather than reinterpret it
-with new build-time settings.
+## 8. Verified successful output
 
-## 8. What successful flashing should look like
+On the physical project board, esptool v5.3.1 connected to the ESP32-S3, started
+the flasher stub, erased the complete 16 MiB Flash address range, wrote all
+`16777216` bytes and verified the programmed data hash.
 
-During a normal write, esptool prints progress messages and then verifies the
-written data.
+The key successful lines were:
 
-Do not disconnect the board while Flash is being erased or programmed.
+```text
+Stub flasher running.
+Configuring flash size...
+Flash will be erased from 0x00000000 to 0x00ffffff...
+Wrote 16777216 bytes (1018650 compressed) at 0x00000000 in 99.9 seconds.
+Hash of data verified.
+Hard resetting via RTS pin...
+```
 
-At the end, reset or reconnect the board if it does not automatically restart.
-The factory firmware should then boot from the restored image.
+Unique per-device identifiers printed by esptool are intentionally omitted from
+public documentation.
 
-Because this full restore has not yet been hardware-verified in this project,
-record the complete esptool output when the first real restore is performed.
+After the hard reset, the saved factory firmware was restored successfully.
 
-## 9. Strong post-restore verification
+## 9. Optional strongest post-restore verification
 
-The strongest project-specific verification is to read the complete Flash back
-again using the already verified `--no-stub` backup method, then compare the
-SHA-256 with the saved factory image.
+For an independent byte-for-byte check, read the complete Flash back again using
+the already verified `--no-stub` backup method, then compare its SHA-256 with the
+saved factory image.
 
 For example:
 
@@ -233,7 +264,7 @@ A matching full-image SHA-256 demonstrates that the entire 16 MiB Flash content
 read back after restore is byte-for-byte identical to the saved image.
 
 The verified no-stub full read is slow on this board/PC combination, so this
-post-restore check may take tens of minutes.
+optional post-restore check may take tens of minutes.
 
 ## 10. If the board does not enter download mode automatically
 
@@ -256,8 +287,7 @@ factory firmware.
 - Do not add `erase-flash` unless there is a separately justified reason.
 - Do not burn or change eFuse as part of firmware restoration.
 - Do not assume another physical board has the same factory-image SHA-256.
-- The first real full restore should be treated as a validation experiment and
-  its output should be recorded before this procedure is marked hardware-verified.
+- Do not publish unique identifiers printed by esptool logs.
 
 ## Related documentation
 
