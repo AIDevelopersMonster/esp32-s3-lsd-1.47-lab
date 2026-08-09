@@ -50,6 +50,22 @@ pio device monitor
 В `platformio.ini` закреплена среда Arduino-ESP32 3.x. Официальная документация
 Waveshare требует пакет ESP32 версии не ниже 3.0.2.
 
+## esptool и резервное копирование Flash
+
+Для диагностики ESP32-S3, определения Flash/PSRAM, чтения заводской прошивки и
+понимания команд `esptool` добавлена отдельная памятка:
+
+- [docs/esptool.md](docs/esptool.md) — команды `flash-id`, `read-flash`,
+  проверка размера backup, SHA-256, безопасные и изменяющие Flash операции;
+- [docs/firmware-backup.md](docs/firmware-backup.md) — процедура сохранения
+  заводской прошивки;
+- [tools/backup-factory.ps1](tools/backup-factory.ps1) — готовый PowerShell-скрипт
+  полного резервного копирования.
+
+На конкретном экземпляре платы команда `esptool v5.3.1 flash-id` уже аппаратно
+подтвердила **ESP32-S3 revision v0.2**, **8 MB embedded PSRAM**, **16 MB Flash**,
+Quad Flash 3.3 V и режим **USB-Serial/JTAG**.
+
 ## Arduino IDE
 
 Инструкция и рекомендуемые параметры находятся в
@@ -102,6 +118,7 @@ examples/01_display_test/01_display_test.ino
 │   ├── pinout.md
 │   ├── arduino-ide.md
 │   ├── firmware-backup.md
+│   ├── esptool.md
 │   └── roadmap.md
 ├── tools/backup-factory.ps1
 ├── platformio.ini
