@@ -10,6 +10,10 @@
     peripheral in 4-bit mode. The sketch mounts the card, prints its type and
     capacity to Serial Monitor, then lists files and directories in the root.
 
+  Video:
+    Hardware test demonstration:
+    https://youtube.com/shorts/eVARX5pUqp4
+
   Libraries:
     - Arduino.h   (included with the ESP32 Arduino core)
     - SD_MMC.h    (included with the ESP32 Arduino core)
