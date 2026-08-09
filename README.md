@@ -71,6 +71,8 @@ Waveshare требует пакет ESP32 версии не ниже 3.0.2.
   проверка размера backup, SHA-256 и основные операции `esptool`;
 - [docs/firmware-backup.md](docs/firmware-backup.md) — процедура сохранения
   заводской прошивки;
+- [docs/firmware-restore.md](docs/firmware-restore.md) — подготовленная процедура
+  восстановления сохранённого полного 16 MiB factory image обратно во Flash;
 - [Видео: сохранение заводской прошивки ESP32-S3-LCD-1.47](https://youtube.com/shorts/AqG7NoXsGEw)
   — реальный процесс полного backup Flash через `esptool --no-stub`;
 - [tools/backup-factory.ps1](tools/backup-factory.ps1) — полный read-only backup
@@ -81,6 +83,12 @@ Waveshare требует пакет ESP32 версии не ниже 3.0.2.
   — обезличенный пример активных eFuse;
 - [docs/examples/efuse-security-audit-example.md](docs/examples/efuse-security-audit-example.md)
   — обезличенный security-аудит реального экземпляра платы.
+
+> [!NOTE]
+> Полный factory backup уже подтверждён несколькими одинаковыми чтениями и
+> SHA-256. Полная процедура restore пока документирована, но будет отмечена как
+> hardware-verified только после реального восстановления, перезапуска платы и
+> контрольного полного чтения Flash.
 
 ### Проверенная security-конфигурация
 
@@ -178,6 +186,7 @@ examples/01_display_test/01_display_test.ino
 │   ├── pinout.md
 │   ├── arduino-ide.md
 │   ├── firmware-backup.md
+│   ├── firmware-restore.md
 │   ├── esptool.md
 │   ├── examples/
 │   │   ├── efuse-active-example.md
@@ -196,6 +205,8 @@ examples/01_display_test/01_display_test.ino
 - Не путать с **ESP32-S3-LCD-1.47B**: это другая аппаратная версия.
 - Не путать с сенсорной `ESP32-S3-Touch-LCD-1.47`: её распиновка отличается.
 - Сохраняйте заводской Flash backup до первого стирания или полной перепрошивки.
+- Перед восстановлением полного factory image обязательно проверяйте размер и
+  SHA-256 и следуйте [docs/firmware-restore.md](docs/firmware-restore.md).
 - Сохраняйте исходный eFuse snapshot как baseline перед security-экспериментами.
 - При проблемах с загрузкой удерживайте BOOT, кратко нажмите RESET, отпустите
   RESET, затем BOOT.
