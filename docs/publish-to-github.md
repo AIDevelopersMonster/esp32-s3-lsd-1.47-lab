@@ -1,22 +1,26 @@
 # Publish the prepared project to GitHub
 
-Recommended repository name:
+Current repository:
 
 ```text
-esp32-s3-lcd-1.47-lab
+AIDevelopersMonster/lab-esp32-s3-lcd-1.47
 ```
 
-Create an empty public repository without adding a README, license or
-`.gitignore`, because those files are already included here.
+If a local clone still points to the previous repository name, update `origin` with:
 
-From PowerShell in the unzipped project directory:
+```powershell
+git remote set-url origin https://github.com/AIDevelopersMonster/lab-esp32-s3-lcd-1.47.git
+git remote -v
+```
+
+For a fresh local checkout from an unzipped project directory:
 
 ```powershell
 git init
 git add .
 git commit -m "Initial ESP32-S3-LCD-1.47 lab project"
 git branch -M main
-git remote add origin https://github.com/AIDevelopersMonster/esp32-s3-lcd-1.47-lab.git
+git remote add origin https://github.com/AIDevelopersMonster/lab-esp32-s3-lcd-1.47.git
 git push -u origin main
 ```
 
