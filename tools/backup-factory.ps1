@@ -12,6 +12,10 @@
 
     This script is READ ONLY. It does not erase or write Flash.
 
+.VIDEO
+    Factory firmware backup demonstration:
+    https://youtube.com/shorts/AqG7NoXsGEw
+
 .PARAMETER Port
     COM port of the board, for example COM16.
 
