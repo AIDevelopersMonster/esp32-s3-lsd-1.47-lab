@@ -1,5 +1,5 @@
 @echo off
-setlocal EnableExtensions EnableDelayedExpansion
+setlocal EnableExtensions
 
 set "OUT=SHA256SUMS.txt"
 > "%OUT%" echo # SHA-256 firmware hashes
@@ -7,10 +7,8 @@ set "OUT=SHA256SUMS.txt"
 set "FOUND=0"
 for %%F in (*.bin) do (
   set "FOUND=1"
-  for /f "tokens=*" %%H in ('certutil -hashfile "%%F" SHA256 ^| findstr /R /V /C:"hash of file" /C:"CertUtil:"') do (
-    set "HASH=%%H"
-    set "HASH=!HASH: =!"
-    if not "!HASH!"=="" >> "%OUT%" echo !HASH!  %%F
+  for /f "usebackq delims=" %%H in (`powershell -NoProfile -Command "(Get-FileHash -LiteralPath '%%~fF' -Algorithm SHA256).Hash.ToLowerInvariant()"`) do (
+    >> "%OUT%" echo %%H  %%F
   )
 )
 
