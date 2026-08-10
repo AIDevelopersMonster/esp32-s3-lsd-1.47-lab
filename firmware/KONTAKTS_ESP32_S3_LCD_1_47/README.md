@@ -20,6 +20,12 @@ KONTAKTS_ESP32_S3_LCD_1_47
 underscore-форму. Человекочитаемое название платы остаётся
 `ESP32-S3-LCD-1.47`.
 
+## Видео
+
+[Waveshare ESP32-S3-LCD-1.47 — прошивка KONTAKTS v0.1.0 через merged BIN](https://www.youtube.com/shorts/Dy9VAgI30Wk)
+
+В ролике показана реальная прошивка release-образа KONTAKTS на физическую плату.
+
 ## Что хранить в Git
 
 Arduino IDE создаёт локальный каталог:
@@ -165,7 +171,7 @@ PSRAM: OPI PSRAM
 Из корня репозитория:
 
 ```bat
-tools\flash-merged.bat COM7 firmware\KONTAKTS_ESP32_S3_LCD_1_47\release\KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.merged.bin
+.\tools\flash-merged.bat COM7 0.1.0
 ```
 
 Или напрямую:
