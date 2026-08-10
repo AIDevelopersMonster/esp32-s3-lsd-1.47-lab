@@ -3,9 +3,19 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch/
+
+# Generated Arduino/IDE build trees.
+**/build/
+
+# Generated binary/debug artifacts are ignored by default.
 *.bin
 *.elf
 *.map
+
+# Explicitly allow curated KONTAKTS release BIN files.
+!firmware/KONTAKTS_ESP32_S3_LCD_1_47/release/
+!firmware/KONTAKTS_ESP32_S3_LCD_1_47/release/*.bin
+
 backup/
 .DS_Store
 Thumbs.db
