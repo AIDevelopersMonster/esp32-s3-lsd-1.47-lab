@@ -132,6 +132,47 @@ Wi-Fi/BLE after setup: OFF
 RGB LED loop: VERIFIED AS PART OF THE RUNNING EXAMPLE
 ```
 
+## Prebuilt firmware image
+
+A prebuilt 16 MiB merged image of this adapted example is published under:
+
+[`firmware/ESP32-S3-LCD-1.47-Waveshare-LVGL-adapted.bin`](firmware/ESP32-S3-LCD-1.47-Waveshare-LVGL-adapted.bin)
+
+Companion checksum:
+
+[`firmware/ESP32-S3-LCD-1.47-Waveshare-LVGL-adapted.bin.sha256`](firmware/ESP32-S3-LCD-1.47-Waveshare-LVGL-adapted.bin.sha256)
+
+SHA-256:
+
+```text
+f7e50d1ed8f5f5da802d16761a6b08bf02d2735ff01810dfcc54ca4fc04ed368
+```
+
+Binary size:
+
+```text
+16777216 bytes
+```
+
+This binary is the compiled **locally adapted Waveshare LVGL demo**. It is not
+the original Waveshare factory firmware, not the raw factory backup captured
+from a physical board, and not the independent KONTAKTS firmware under the
+repository's top-level `firmware/` directory.
+
+The image is intended to be flashed as a merged image from offset `0x0`:
+
+```powershell
+py -m esptool `
+    --chip esp32s3 `
+    --port COM16 `
+    write-flash `
+    0x0 .\ESP32-S3-LCD-1.47-Waveshare-LVGL-adapted.bin
+```
+
+Change `COM16` to the actual port. Verify SHA-256 before flashing.
+
+Detailed binary documentation is in [`firmware/README.md`](firmware/README.md).
+
 ## Hardware verification video
 
 The adapted example running on the physical ESP32-S3-LCD-1.47 is shown here:
