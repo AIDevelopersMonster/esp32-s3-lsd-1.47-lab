@@ -1,3 +1,22 @@
+/**
+ ******************************************************************************
+ * @file     LVGL_Driver.h
+ * @brief    LVGL 8 display-driver declarations for Waveshare ESP32-S3-LCD-1.47
+ ******************************************************************************
+ * Vendor-derived source from the Waveshare LVGL_Arduino example.
+ *
+ * Local compatibility notes:
+ * - tested with Arduino-ESP32 3.3.11 and LVGL 8.3.10;
+ * - direct #include <lv_conf.h> was removed because LVGL loads its configuration
+ *   internally from the standard lv_conf.h location next to the lvgl folder;
+ * - unused #include <demos/lv_demos.h> was removed because this example does not
+ *   call the LVGL demo API and the include caused a build failure when demos were
+ *   not installed.
+ *
+ * See README.md in this directory for the complete adaptation history.
+ ******************************************************************************
+ */
+
 #pragma once
 
 #include <lvgl.h>
