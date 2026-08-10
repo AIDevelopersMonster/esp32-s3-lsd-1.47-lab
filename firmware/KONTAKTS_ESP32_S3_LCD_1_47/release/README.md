@@ -3,6 +3,12 @@
 В эту папку вручную или скриптом копируются только готовые release-файлы прошивки.
 Каталог `build/`, который создаёт Arduino IDE, сюда не переносится.
 
+## Видео установки
+
+[Waveshare ESP32-S3-LCD-1.47 — прошивка KONTAKTS v0.1.0 через merged BIN](https://www.youtube.com/shorts/Dy9VAgI30Wk)
+
+В ролике показана реальная запись release-образа `KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.merged.bin` на физическую плату.
+
 Для версии `v0.1.0` ожидаются:
 
 ```text
@@ -28,3 +34,11 @@ firmware\KONTAKTS_ESP32_S3_LCD_1_47\build\esp32.esp32.esp32s3\
 ```
 
 и принудительно перезаписывает соответствующие release-копии в этой папке.
+
+Для прошивки merged release из корня репозитория:
+
+```powershell
+.\tools\flash-merged.bat COM16 0.1.0
+```
+
+Замените `COM16` на актуальный COM-порт платы.
