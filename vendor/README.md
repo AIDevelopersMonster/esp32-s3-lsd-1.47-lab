@@ -18,9 +18,11 @@ Current adapted vendor examples:
 A prebuilt binary is intentionally kept with the vendor-derived source rather than under the independent project firmware tree:
 
 - [`LVGL_Arduino/firmware/ESP32-S3-LCD-1.47-Waveshare-LVGL-adapted.bin`](LVGL_Arduino/firmware/ESP32-S3-LCD-1.47-Waveshare-LVGL-adapted.bin) — 16 MiB merged image of the locally adapted Waveshare LVGL demo.
-- [`LVGL_Arduino/firmware/README.md`](LVGL_Arduino/firmware/README.md) — binary purpose, SHA-256, verification notes, and flashing instructions.
+- [`LVGL_Arduino/firmware/README.md`](LVGL_Arduino/firmware/README.md) — binary purpose, SHA-256, verification notes, provenance statement, and flashing instructions.
 
-The prebuilt vendor-derived image is not the original Waveshare factory firmware, not the raw factory backup, and not the independent KONTAKTS firmware under the repository's top-level `firmware/` directory.
+For provenance purposes, this prebuilt image is described in this repository as the **project-maintained adapted Waveshare factory-demo variant**. It represents our corrected version of Waveshare's published LVGL demonstration as we believe it should behave on this board after the documented fixes. It is **not** the original Waveshare factory firmware, is **not** claimed to be byte-identical to the firmware that arrived preinstalled on the board, and is **not** an official Waveshare replacement image.
+
+The actual factory-installed state is treated separately as a raw physical-board backup. The adapted vendor-derived image is also separate from the independent KONTAKTS firmware under the repository's top-level `firmware/` directory.
 
 Project repository:
 
