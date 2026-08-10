@@ -115,12 +115,6 @@ LVGL: 8.3.10
 microSD test card: nominal 16 GB
 ```
 
-Observed microSD size in the running panel was approximately:
-
-```text
-14984 MiB
-```
-
 Status of this adapted example:
 
 ```text
@@ -141,6 +135,55 @@ RGB LED loop: VERIFIED AS PART OF THE RUNNING EXAMPLE
 The adapted example running on the physical ESP32-S3-LCD-1.47 is shown here:
 
 **[ESP32-S3-LCD-1.47 — Waveshare LVGL 8.3.10 example](https://youtube.com/shorts/OSkb3rakpZM)**
+
+## Hardware-verified console output
+
+The following output was captured from the physical board after the final
+adaptation:
+
+```text
+========================================
+ Waveshare ESP32-S3-LCD-1.47
+========================================
+Chip model      : ESP32-S3
+Chip revision   : 2
+CPU cores       : 2
+CPU frequency   : 240 MHz
+Flash size      : 16 MB
+PSRAM size      : 8 MB
+Free heap       : 211776 bytes
+Free PSRAM      : 8356164 bytes
+
+Display         : ST7789
+Resolution      : 172 x 320
+LCD MOSI        : GPIO45
+LCD SCLK        : GPIO40
+LCD CS          : GPIO42
+LCD DC          : GPIO41
+LCD RESET       : GPIO39
+LCD backlight   : GPIO48
+RGB LED         : GPIO38
+
+SD CMD          : GPIO15
+SD CLK          : GPIO14
+SD D0           : GPIO16
+SD D1           : GPIO18
+SD D2           : GPIO17
+SD D3           : GPIO21
+microSD         : 14984 MiB
+
+Wi-Fi init      : OK (now OFF)
+Bluetooth BLE   : OK (now OFF)
+
+Arduino-ESP32   : 3.3.11
+LVGL            : 8.3.10
+========================================
+```
+
+`Free heap` and `Free PSRAM` are runtime values and can vary between builds and
+boots. The output is informational; `W: OK` / `B: OK` means that initialization
+completed successfully, not that an RF link, antenna performance, range, or a
+complete wireless self-test was verified.
 
 ## Required LVGL configuration
 
@@ -207,26 +250,6 @@ in that file (`#if 1` in the standard LVGL 8 template).
 
 These remain essentially vendor logic. Local additions are documentation and
 provenance comments so the role of each file is clear.
-
-## Serial / console output
-
-At startup the adapted sketch prints a board-information block containing the
-actual chip model/revision, CPU frequency, Flash, PSRAM, free memory, display
-and SD pin mapping, mounted microSD size, wireless initialization result,
-Arduino-ESP32 version and LVGL version.
-
-A typical ending is:
-
-```text
-Wi-Fi init      : OK (now OFF)
-Bluetooth BLE   : OK (now OFF)
-
-Arduino-ESP32   : 3.3.11
-LVGL            : 8.3.10
-```
-
-This is informational output, not a claim of a complete RF or hardware
-self-test.
 
 ## Project
 
