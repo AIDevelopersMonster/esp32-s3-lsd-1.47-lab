@@ -28,10 +28,10 @@ The vendor `LCD_Image.ino` included in the downloaded demo explicitly declares:
 ```
 
 The companion `.cpp` and `.h` files in the downloaded example did not contain
-individual license headers in the copy inspected for this project. Local headers
-have therefore been added to preserve provenance and to point back to the MIT
-declaration in the vendor's top-level sketch. See `LICENSE-MIT.txt` in this
-directory.
+individual license headers in the copy inspected for this project. The original
+sketch header is preserved, a directory-level MIT license notice is included,
+and files modified by this project carry local provenance/compatibility comments
+where useful. See `LICENSE-MIT.txt` in this directory.
 
 ## Why this adapted copy is included
 
@@ -175,7 +175,7 @@ See:
 
 - `LICENSE-MIT.txt`
 - the original header retained in `LCD_Image.ino`
-- local provenance comments at the top of the companion source files
+- local provenance comments in the files modified by this project
 
 ## Project
 
