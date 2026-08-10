@@ -8,6 +8,25 @@
  * @license  MIT
  * @copyright Copyright (c) 2024, Waveshare
  ******************************************************************************
+ *
+ * LOCAL PROJECT NOTE
+ * ------------------
+ * This is a vendor-derived Waveshare example kept under vendor/ with local
+ * compatibility fixes in its companion source files.
+ *
+ * Hardware-verified environment used by this repository:
+ *   - Waveshare ESP32-S3-LCD-1.47
+ *   - esp32 by Espressif Systems 3.3.11
+ *   - PNGdec 1.1.6
+ *
+ * The downloaded vendor example did not run unchanged in this environment.
+ * The observed incompatibilities may be caused by dependency/API differences
+ * from the versions used when the original 2024 example was prepared. This
+ * repository therefore documents the tested behavior and local fixes without
+ * claiming that every version of the original vendor package is affected.
+ *
+ * See README.md in this directory for provenance, exact changes and test status.
+ ******************************************************************************
  * 
  * Experiment Objective: Learn how to set up and use SD card for image display and control an RGB lamp.
  *
