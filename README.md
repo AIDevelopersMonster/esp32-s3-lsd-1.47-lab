@@ -42,7 +42,7 @@ ESP32-S3/Flash/PSRAM/microSD, состояние Wi-Fi/BLE, контроллер
 
 ## Что уже подготовлено
 
-Основная прошивка `src/main.cpp` превращает плату в небольшой диагностический
+Основная прошивка [`src/main.cpp`](src/main.cpp) превращает плату в небольшой диагностический
 терминал:
 
 - показывает модель микроконтроллера, частоту, Flash, PSRAM и свободную память;
@@ -71,7 +71,7 @@ pio run -t upload
 pio device monitor
 ```
 
-В `platformio.ini` закреплена среда Arduino-ESP32 3.x. Официальная документация
+В [`platformio.ini`](platformio.ini) закреплена среда Arduino-ESP32 3.x. Официальная документация
 Waveshare требует пакет ESP32 версии не ниже 3.0.2.
 
 ## esptool, backup и eFuse
@@ -125,7 +125,7 @@ Waveshare требует пакет ESP32 версии не ниже 3.0.2.
 security configuration.
 
 > [!WARNING]
-> eFuse — однократно программируемая память. Скрипт `read-efuses.ps1` выполняет
+> eFuse — однократно программируемая память. Скрипт [`tools/read-efuses.ps1`](tools/read-efuses.ps1) выполняет
 > только чтение. Команды записи/burn намеренно не автоматизированы в этом
 > проекте: изменение security, key, JTAG, USB, calibration или protection eFuse
 > может быть необратимым.
@@ -161,21 +161,15 @@ Arduino IDE позволяет получить сразу два полезны
 
 Для Windows добавлены:
 
-```text
-tools\flash-merged.bat COM7 path\to\KONTAKTS.merged.bin
-tools\make-firmware-hashes.bat
-```
+- [`tools/flash-merged.bat`](tools/flash-merged.bat) — быстрый запуск: `tools\flash-merged.bat COM7 path\to\KONTAKTS.merged.bin`;
+- [`tools/make-firmware-hashes.bat`](tools/make-firmware-hashes.bat) — создание `SHA256SUMS.txt` для BIN-файлов в текущем каталоге.
 
-Первый BAT быстро прошивает готовый merged image через `esptool`, второй
-создаёт `SHA256SUMS.txt` для BIN-файлов в текущем каталоге. В документации также
-приведены команды SHA-256 для PowerShell (`Get-FileHash`), CMD (`certutil`) и
-Linux/macOS (`sha256sum`).
+В документации также приведены команды SHA-256 для PowerShell (`Get-FileHash`),
+CMD (`certutil`) и Linux/macOS (`sha256sum`).
 
 Для первичной проверки можно открыть:
 
-```text
-examples/01_display_test/01_display_test.ino
-```
+[`examples/01_display_test/01_display_test.ino`](examples/01_display_test/01_display_test.ino)
 
 ## Распиновка встроенных устройств
 
