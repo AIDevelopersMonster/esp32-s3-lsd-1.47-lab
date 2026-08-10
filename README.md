@@ -37,6 +37,9 @@ PlatformIO и ESP-IDF.
 ESP32-S3/Flash/PSRAM/microSD, состояние Wi-Fi/BLE, контроллер ST7789,
 разрешение 172 × 320 и версию firmware.
 
+[Видео: прошивка KONTAKTS v0.1.0 через merged BIN и BAT-скрипт](https://www.youtube.com/shorts/Dy9VAgI30Wk)
+— реальная установка нашей release-прошивки на Waveshare ESP32-S3-LCD-1.47.
+
 Заводской полный Flash backup хранится отдельно и нужен только как исходная
 точка восстановления. Его нельзя путать с release-образами KONTAKTS.
 
