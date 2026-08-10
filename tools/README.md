@@ -31,7 +31,15 @@ firmware\KONTAKTS_ESP32_S3_LCD_1_47\build\esp32.esp32.esp32s3\
 ```
 
 Для принудительного копирования двух нужных BIN в release-папку выполните из
-корня репозитория:
+корня репозитория.
+
+PowerShell:
+
+```powershell
+.\tools\export-kontakts-release.bat 0.1.0
+```
+
+CMD:
 
 ```bat
 tools\export-kontakts-release.bat 0.1.0
@@ -46,27 +54,11 @@ tools\export-kontakts-release.bat 0.1.0
   release-копии;
 - добавляет номер версии в имя.
 
-Результат для версии `0.1.0`:
-
-```text
-firmware\KONTAKTS_ESP32_S3_LCD_1_47\release\
-    KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.bin
-    KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.merged.bin
-```
-
-Эквивалентные ручные команды из корня репозитория:
-
-```bat
-if not exist firmware\KONTAKTS_ESP32_S3_LCD_1_47\release mkdir firmware\KONTAKTS_ESP32_S3_LCD_1_47\release
-copy /Y firmware\KONTAKTS_ESP32_S3_LCD_1_47\build\esp32.esp32.esp32s3\KONTAKTS_ESP32_S3_LCD_1_47.ino.bin firmware\KONTAKTS_ESP32_S3_LCD_1_47\release\KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.bin
-copy /Y firmware\KONTAKTS_ESP32_S3_LCD_1_47\build\esp32.esp32.esp32s3\KONTAKTS_ESP32_S3_LCD_1_47.ino.merged.bin firmware\KONTAKTS_ESP32_S3_LCD_1_47\release\KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.merged.bin
-```
-
 ## SHA-256 release-файлов
 
 После экспорта:
 
-```bat
+```powershell
 cd firmware\KONTAKTS_ESP32_S3_LCD_1_47\release
 ..\..\..\tools\make-firmware-hashes.bat
 ```
@@ -76,13 +68,47 @@ cd firmware\KONTAKTS_ESP32_S3_LCD_1_47\release
 
 ## Быстрая прошивка merged BIN
 
-Из корня репозитория:
+### Самый простой способ — по номеру версии
 
-```bat
-tools\flash-merged.bat COM7 firmware\KONTAKTS_ESP32_S3_LCD_1_47\release\KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.merged.bin
+Скрипт [`flash-merged.bat`](flash-merged.bat) теперь сам находит release BIN по
+номеру версии и не зависит от текущей рабочей папки.
+
+Из **корня репозитория** в PowerShell:
+
+```powershell
+.\tools\flash-merged.bat COM16 0.1.0
 ```
 
-[`flash-merged.bat`](flash-merged.bat) записывает merged image с адреса `0x0`.
+Из **папки firmware\KONTAKTS_ESP32_S3_LCD_1_47** в PowerShell:
+
+```powershell
+..\..\tools\flash-merged.bat COM16 0.1.0
+```
+
+Из **release-папки** в PowerShell:
+
+```powershell
+..\..\..\tools\flash-merged.bat COM16 0.1.0
+```
+
+В CMD начальный `.\` не обязателен.
+
+### Прошивка с явным путём к merged BIN
+
+Из корня репозитория в PowerShell:
+
+```powershell
+.\tools\flash-merged.bat COM16 .\firmware\KONTAKTS_ESP32_S3_LCD_1_47\release\KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.merged.bin
+```
+
+Merged image записывается с адреса `0x0`.
+
+> [!NOTE]
+> В PowerShell относительный исполняемый файл из текущего каталога обычно
+> запускается через `./` или `.\`. Команда `tools\flash-merged.bat ...` корректна
+> из корня в CMD, но в PowerShell используйте `.\tools\flash-merged.bat ...`.
+> Если вы уже находитесь внутри `firmware\KONTAKTS_ESP32_S3_LCD_1_47`, путь
+> `tools\...` неверен, потому что папка `tools` находится на два уровня выше.
 
 ## Остальные скрипты
 
@@ -105,17 +131,12 @@ tools\flash-merged.bat COM7 firmware\KONTAKTS_ESP32_S3_LCD_1_47\release\KONTAKTS
 
 ## Короткий рабочий цикл
 
-Из корня репозитория:
+Из корня репозитория в PowerShell:
 
-```bat
-tools\export-kontakts-release.bat 0.1.0
+```powershell
+.\tools\export-kontakts-release.bat 0.1.0
 cd firmware\KONTAKTS_ESP32_S3_LCD_1_47\release
 ..\..\..\tools\make-firmware-hashes.bat
-```
-
-После этого для прошивки merged image:
-
-```bat
-cd /d ..\..\..
-tools\flash-merged.bat COM7 firmware\KONTAKTS_ESP32_S3_LCD_1_47\release\KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.merged.bin
+cd ..\..\..
+.\tools\flash-merged.bat COM16 0.1.0
 ```
