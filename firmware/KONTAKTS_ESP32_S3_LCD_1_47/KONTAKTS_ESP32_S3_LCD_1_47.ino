@@ -1,6 +1,6 @@
 /*
- * KONTAKTS_ESP32-S3-LCD-1.47 firmware
- * ====================================
+ * KONTAKTS_ESP32_S3_LCD_1_47 firmware
+ * ===================================
  * Version: 0.1.0
  * Target:  Waveshare ESP32-S3-LCD-1.47 (USB-A variant)
  * License: MIT (same project license)
@@ -39,7 +39,7 @@
 // -----------------------------------------------------------------------------
 // Firmware identity
 // -----------------------------------------------------------------------------
-static constexpr const char* FW_NAME    = "KONTAKTS_ESP32-S3-LCD-1.47";
+static constexpr const char* FW_NAME    = "KONTAKTS_ESP32_S3_LCD_1_47";
 static constexpr const char* FW_VERSION = "0.1.0";
 
 // -----------------------------------------------------------------------------
