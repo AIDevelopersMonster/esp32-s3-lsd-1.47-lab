@@ -28,18 +28,46 @@ Open an example from the `examples` directory and upload it.
 
 The firmware shown on the board as **KONTAKTS / ESP32-S3-LCD-1.47 / FW v0.1.0** is our project firmware, not the original Waveshare factory demo.
 
+Canonical project/release identifier:
+
+```text
+KONTAKTS_ESP32_S3_LCD_1_47
+```
+
+The underscore form is used for the Arduino sketch folder, sketch file and release BIN names. The board model remains human-readable as `ESP32-S3-LCD-1.47`.
+
 Keep the original factory backup separately. Do not confuse a project release image with the saved factory image.
 
 ## Build two BIN files in Arduino IDE
+
+Open:
+
+[`../firmware/KONTAKTS_ESP32_S3_LCD_1_47/KONTAKTS_ESP32_S3_LCD_1_47.ino`](../firmware/KONTAKTS_ESP32_S3_LCD_1_47/KONTAKTS_ESP32_S3_LCD_1_47.ino)
 
 With Arduino-ESP32 3.x, use:
 
 **Sketch -> Export Compiled Binary**
 
-Arduino IDE places compiled files in the sketch directory. Depending on the exact Arduino IDE/core version, names can differ slightly, but the useful pair is normally:
+Arduino IDE places compiled files in the sketch directory. Depending on the exact Arduino IDE/core version, generated names can contain `.ino`, but the useful pair is:
 
-- `SketchName.bin` - application image only;
-- `SketchName.merged.bin` - merged image containing the bootloader, partition table and application at their correct flash offsets.
+- application image only;
+- merged image containing bootloader, partition table and application.
+
+For releases, use these canonical names:
+
+```text
+KONTAKTS_ESP32_S3_LCD_1_47.bin
+KONTAKTS_ESP32_S3_LCD_1_47.merged.bin
+```
+
+If Arduino exports:
+
+```text
+KONTAKTS_ESP32_S3_LCD_1_47.ino.bin
+KONTAKTS_ESP32_S3_LCD_1_47.ino.merged.bin
+```
+
+rename the release copies to the canonical names above.
 
 For distribution and quick recovery, keep both files. The **merged BIN is the preferred one-file image** when flashing with `esptool` or the supplied batch file.
 
@@ -52,28 +80,26 @@ Always publish/check SHA-256 together with release BIN files.
 ### Windows PowerShell
 
 ```powershell
-Get-FileHash .\KONTAKTS.bin -Algorithm SHA256
-Get-FileHash .\KONTAKTS.merged.bin -Algorithm SHA256
+Get-FileHash .\KONTAKTS_ESP32_S3_LCD_1_47.bin -Algorithm SHA256
+Get-FileHash .\KONTAKTS_ESP32_S3_LCD_1_47.merged.bin -Algorithm SHA256
 ```
 
 ### Windows CMD
 
 ```bat
-certutil -hashfile KONTAKTS.bin SHA256
-certutil -hashfile KONTAKTS.merged.bin SHA256
+certutil -hashfile KONTAKTS_ESP32_S3_LCD_1_47.bin SHA256
+certutil -hashfile KONTAKTS_ESP32_S3_LCD_1_47.merged.bin SHA256
 ```
 
 ### Linux/macOS
 
 ```bash
-sha256sum KONTAKTS.bin KONTAKTS.merged.bin
+sha256sum KONTAKTS_ESP32_S3_LCD_1_47.bin KONTAKTS_ESP32_S3_LCD_1_47.merged.bin
 ```
 
 For Windows, the repository also contains:
 
-```text
-tools\make-firmware-hashes.bat
-```
+[`../tools/make-firmware-hashes.bat`](../tools/make-firmware-hashes.bat)
 
 Run it in a directory containing the release `.bin` files. It creates `SHA256SUMS.txt`.
 
@@ -100,10 +126,10 @@ py -m pip install -U esptool
 Then flash a merged image:
 
 ```powershell
-py -m esptool --chip esp32s3 --port COM7 --baud 921600 write-flash 0x0 KONTAKTS.merged.bin
+py -m esptool --chip esp32s3 --port COM7 --baud 921600 write-flash 0x0 KONTAKTS_ESP32_S3_LCD_1_47.merged.bin
 ```
 
-Replace `COM7` and the file name with your actual values.
+Replace `COM7` with the actual board port.
 
 A merged Arduino image is intentionally written from address `0x0`: the image already contains the components placed at their required offsets.
 
@@ -113,14 +139,12 @@ After writing, press **RESET** if the board does not restart automatically.
 
 The repository contains:
 
-```text
-tools\flash-merged.bat
-```
+[`../tools/flash-merged.bat`](../tools/flash-merged.bat)
 
-Usage:
+From the repository root:
 
 ```bat
-tools\flash-merged.bat COM7 path\to\KONTAKTS.merged.bin
+tools\flash-merged.bat COM7 firmware\KONTAKTS_ESP32_S3_LCD_1_47\KONTAKTS_ESP32_S3_LCD_1_47.merged.bin
 ```
 
 The batch file checks that the BIN exists and then invokes:
@@ -133,12 +157,12 @@ This is the fastest repeatable method when the firmware is already built: no nee
 
 ## Application-only BIN: use with care
 
-If you intentionally want to write only `KONTAKTS.bin`, first confirm the application offset from the selected partition table or from Arduino IDE verbose upload output.
+If you intentionally want to write only `KONTAKTS_ESP32_S3_LCD_1_47.bin`, first confirm the application offset from the selected partition table or from Arduino IDE verbose upload output.
 
 For a layout where the application starts at `0x10000`, the command is:
 
 ```powershell
-py -m esptool --chip esp32s3 --port COM7 --baud 921600 write-flash 0x10000 KONTAKTS.bin
+py -m esptool --chip esp32s3 --port COM7 --baud 921600 write-flash 0x10000 KONTAKTS_ESP32_S3_LCD_1_47.bin
 ```
 
 Do **not** use this command blindly with a different partition scheme. A wrong offset can produce an unbootable image while leaving other flash regions intact.
@@ -151,9 +175,12 @@ For each KONTAKTS firmware release:
 2. Build successfully in Arduino IDE.
 3. Use **Sketch -> Export Compiled Binary**.
 4. Keep both the application `.bin` and `.merged.bin`.
-5. Generate `SHA256SUMS.txt` with `tools\make-firmware-hashes.bat`.
-6. Test-flash the `.merged.bin` on the real ESP32-S3-LCD-1.47.
-7. Record the version, Arduino-ESP32 version, build settings and hashes with the release.
+5. Rename release copies to `KONTAKTS_ESP32_S3_LCD_1_47.bin` and `KONTAKTS_ESP32_S3_LCD_1_47.merged.bin` if necessary.
+6. Generate `SHA256SUMS.txt` with [`../tools/make-firmware-hashes.bat`](../tools/make-firmware-hashes.bat).
+7. Test-flash the `.merged.bin` on the real ESP32-S3-LCD-1.47.
+8. Record the version, Arduino-ESP32 version, build settings and hashes with the release.
+
+The GitHub Actions workflow [`../.github/workflows/build-kontakts-firmware.yml`](../.github/workflows/build-kontakts-firmware.yml) performs the same naming automatically and publishes both BIN files plus `SHA256SUMS.txt` as the build artifact.
 
 ## Entering download mode manually
 
