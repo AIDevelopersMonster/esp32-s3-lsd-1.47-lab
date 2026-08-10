@@ -20,84 +20,97 @@ KONTAKTS_ESP32_S3_LCD_1_47
 underscore-форму. Человекочитаемое название платы остаётся
 `ESP32-S3-LCD-1.47`.
 
-## Что хранить, а что не хранить
+## Что хранить в Git
 
-**Не нужно переносить в репозиторий весь каталог `build/`, созданный Arduino
-IDE.** Это воспроизводимые промежуточные файлы, среди которых есть большие
-`.elf`, `.map`, `sdkconfig` и другие служебные результаты сборки.
+Arduino IDE создаёт локальный каталог:
 
-Для готовой версии прошивки достаточно сохранить два BIN-файла:
+```text
+firmware/KONTAKTS_ESP32_S3_LCD_1_47/build/
+```
+
+В нём находятся воспроизводимые build-артефакты: `.elf`, `.map`, `sdkconfig`,
+служебные BIN и другие промежуточные файлы. **Весь `build/` в Git не переносим.**
+Корневой `.gitignore` теперь явно исключает все `**/build/`.
+
+Для готового release сохраняем только два BIN:
 
 ```text
 KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.bin
 KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.merged.bin
 ```
 
-Первый — только application image. Второй — объединённый 16 MiB образ для
-однофайловой прошивки с адреса `0x0`.
-
-Дополнительно для публикации рекомендуется создать:
+и контрольный файл:
 
 ```text
 SHA256SUMS.txt
 ```
 
-То есть минимальный release-набор — **2 BIN + SHA256SUMS.txt**.
+Для них используется отдельная папка:
 
-> [!NOTE]
-> В корневом `.gitignore` проекта BIN-файлы намеренно игнорируются. Это удобно:
-> автоматически созданные binaries не засоряют историю Git. Для распространения
-> готовых версий лучше прикладывать два BIN и `SHA256SUMS.txt` к **GitHub Release**,
-> а не коммитить новый 16 MiB merged image в Git при каждой версии.
+```text
+firmware/KONTAKTS_ESP32_S3_LCD_1_47/release/
+```
+
+В `.gitignore` сделано исключение, разрешающее хранить BIN именно из этой
+release-папки, несмотря на общее правило `*.bin`.
 
 ## Какие два файла брать из Arduino IDE
 
-Из фактического каталога Arduino IDE:
+После свежей сборки нужны:
 
 ```text
-build/esp32.esp32.esp32s3/
+build/esp32.esp32.esp32s3/KONTAKTS_ESP32_S3_LCD_1_47.ino.bin
+build/esp32.esp32.esp32s3/KONTAKTS_ESP32_S3_LCD_1_47.ino.merged.bin
 ```
 
-нужны эти два свежих результата сборки:
+При экспорте release-копиям присваиваются имена с версией:
 
 ```text
-KONTAKTS_ESP32_S3_LCD_1_47.ino.bin
-KONTAKTS_ESP32_S3_LCD_1_47.ino.merged.bin
+KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.bin
+KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.merged.bin
 ```
 
-Для release-копий убираем `.ino` из имени и добавляем номер версии:
+## Автоматический принудительный экспорт BIN
 
-```text
-KONTAKTS_ESP32_S3_LCD_1_47.ino.bin
-    -> KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.bin
+Из корня репозитория:
 
-KONTAKTS_ESP32_S3_LCD_1_47.ino.merged.bin
-    -> KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.merged.bin
+```bat
+tools\export-kontakts-release.bat 0.1.0
 ```
 
-Исходные имена Arduino IDE можно не менять внутри `build/`; переименовываются
-только release-копии.
+Скрипт [`../../tools/export-kontakts-release.bat`](../../tools/export-kontakts-release.bat):
+
+- проверяет наличие двух свежих Arduino BIN;
+- создаёт `release/`, если её ещё нет;
+- копирует оба файла через `copy /Y`;
+- **принудительно перезаписывает** старые release-файлы этой же версии;
+- автоматически добавляет `v0.1.0` в имена.
+
+Ручной эквивалент из корня репозитория:
+
+```bat
+if not exist firmware\KONTAKTS_ESP32_S3_LCD_1_47\release mkdir firmware\KONTAKTS_ESP32_S3_LCD_1_47\release
+copy /Y firmware\KONTAKTS_ESP32_S3_LCD_1_47\build\esp32.esp32.esp32s3\KONTAKTS_ESP32_S3_LCD_1_47.ino.bin firmware\KONTAKTS_ESP32_S3_LCD_1_47\release\KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.bin
+copy /Y firmware\KONTAKTS_ESP32_S3_LCD_1_47\build\esp32.esp32.esp32s3\KONTAKTS_ESP32_S3_LCD_1_47.ino.merged.bin firmware\KONTAKTS_ESP32_S3_LCD_1_47\release\KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.merged.bin
+```
 
 ## Файлы, создаваемые Arduino IDE
 
-Ниже перечислены файлы, реально наблюдавшиеся в сборке
-`KONTAKTS_ESP32_S3_LCD_1_47 v0.1.0`.
-
 | Файл | Назначение | Нужен в release? |
 |---|---|---|
-| `boot_app0.bin` | Служебный boot/OTA image Arduino-ESP32. В данной сборке `flash_args` записывает его по адресу `0xE000`. | Нет отдельно, уже включён в merged BIN |
-| `build.options.json` | Параметры конкретной сборки Arduino IDE; полезен для диагностики воспроизводимости. | Обычно нет |
-| `flash_args` | Точные параметры и адреса, которые Arduino/esptool используют для записи этой сборки. | Нет, но его содержание документировано ниже |
-| `KONTAKTS_ESP32_S3_LCD_1_47.ino.bin` | Основное приложение KONTAKTS. В этой сборке записывается по адресу `0x10000`. | **Да** |
-| `KONTAKTS_ESP32_S3_LCD_1_47.ino.bootloader.bin` | Bootloader ESP32-S3 для этой конфигурации сборки. | Нет отдельно, включён в merged BIN |
-| `KONTAKTS_ESP32_S3_LCD_1_47.ino.elf` | ELF с кодом, символами и секциями. Нужен для отладки, symbol lookup и анализа crash/backtrace. | Нет |
-| `KONTAKTS_ESP32_S3_LCD_1_47.ino.map` | Linker map: карта размещения функций, данных и секций в памяти. | Нет |
-| `KONTAKTS_ESP32_S3_LCD_1_47.ino.merged.bin` | Объединённый flash image: bootloader + partitions + boot_app0 + application в правильных offsets. В наблюдавшейся сборке имеет размер ровно 16 MiB. | **Да, основной файл для простой прошивки** |
-| `KONTAKTS_ESP32_S3_LCD_1_47.ino.partitions.bin` | Бинарная таблица разделов ESP32-S3. В этой сборке записывается по адресу `0x8000`. | Нет отдельно, включена в merged BIN |
-| `partitions.csv` | Текстовое описание partition table, из которого формируется `partitions.bin`. | Обычно нет |
-| `sdkconfig` | Автоматически сформированная конфигурация ESP32/Arduino build environment. | Нет |
+| `boot_app0.bin` | Служебный boot/OTA image Arduino-ESP32. | Нет отдельно |
+| `build.options.json` | Параметры конкретной сборки Arduino IDE. | Обычно нет |
+| `flash_args` | Точные аргументы esptool/Arduino для этой сборки. | Нет, но полезен для диагностики |
+| `KONTAKTS_ESP32_S3_LCD_1_47.ino.bin` | Основное application image. | **Да** |
+| `KONTAKTS_ESP32_S3_LCD_1_47.ino.bootloader.bin` | Bootloader ESP32-S3. | Нет отдельно |
+| `KONTAKTS_ESP32_S3_LCD_1_47.ino.elf` | ELF для отладки и анализа crash/backtrace. | Нет |
+| `KONTAKTS_ESP32_S3_LCD_1_47.ino.map` | Linker map с размещением кода и данных. | Нет |
+| `KONTAKTS_ESP32_S3_LCD_1_47.ino.merged.bin` | Объединённый flash image. | **Да** |
+| `KONTAKTS_ESP32_S3_LCD_1_47.ino.partitions.bin` | Бинарная partition table. | Нет отдельно |
+| `partitions.csv` | Текстовая partition table. | Обычно нет |
+| `sdkconfig` | Автоматически сформированная конфигурация сборки. | Нет |
 
-### Файлы с `_flashed` в имени
+### Файлы `_flashed.bin`
 
 В рабочем каталоге также наблюдались:
 
@@ -107,134 +120,94 @@ KONTAKTS_ESP32_S3_LCD_1_47.ino.partitions_flashed.bin
 KONTAKTS_ESP32_S3_LCD_1_47.ino_flashed.bin
 ```
 
-Они имеют более ранние timestamps, чем текущая свежая сборка, и **не входят в
-актуальный `flash_args` Arduino IDE**. Поэтому они не считаются обязательными
-release-артефактами и не должны подменять свежие `.ino.bin`,
-`.ino.partitions.bin` или `.ino.bootloader.bin` без отдельно зафиксированного
-происхождения. Для обычного release их не переносим.
+Они имели более ранние timestamps, чем свежая сборка, и не считаются
+обязательными release-артефактами. Их в release не переносим.
 
-## Точные flash offsets этой сборки
+## Flash offsets
 
-Фактический `flash_args`, полученный из Arduino IDE, содержит:
+Переданный `flash_args` показывает следующие offsets:
 
 ```text
---flash-mode dio --flash-freq 80m --flash-size 16MB
-0x0     KONTAKTS_ESP32_S3_LCD_1_47.ino.bootloader.bin
-0x8000  KONTAKTS_ESP32_S3_LCD_1_47.ino.partitions.bin
-0xe000  boot_app0.bin
-0x10000 KONTAKTS_ESP32_S3_LCD_1_47.ino.bin
+0x0     bootloader
+0x8000  partitions
+0xE000  boot_app0
+0x10000 application
 ```
 
-Таким образом, для **именно этой аппаратно проверяемой сборки** адрес
-application image не предполагается, а известен точно:
+Поэтому для этой схемы application BIN записывается по:
 
 ```text
-application offset = 0x10000
+0x10000
 ```
 
-Также важно, что данный `flash_args` сообщает:
+### Важно: QIO/DIO нужно перепроверить
+
+В настройках Arduino IDE для аппаратно проверенной сборки был выбран **QIO**.
+При этом ранее переданный файл `flash_args` содержал строку с `--flash-mode dio`.
+Это противоречие не следует трактовать как подтверждение DIO: файл мог относиться
+к другой/предыдущей конфигурации либо Arduino core мог сформировать отдельный
+upload-параметр.
+
+До чистой пересборки и повторной проверки `flash_args` в документации считаем
+целевой IDE-настройкой:
 
 ```text
-flash mode = DIO
-flash frequency = 80 MHz
-flash size = 16 MB
+Flash Mode: QIO 80 MHz
+Flash Size: 16 MB
+PSRAM: OPI PSRAM
 ```
 
-Эти значения следует считать фактическими параметрами данной Arduino IDE
-сборки при воспроизведении или диагностике.
+А строку `dio` из старого `flash_args` считаем **неразрешённым build-provenance
+расхождением**, а не новым подтверждённым параметром платы.
 
-## Два способа прошивки
+## Прошивка merged BIN
 
-### 1. Рекомендуемый простой способ: merged BIN
-
-Для чистой полной установки используйте:
-
-```text
-KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.merged.bin
-```
-
-Запись начинается с `0x0`:
-
-```powershell
-py -m esptool --chip esp32s3 --port COM7 --baud 921600 write-flash 0x0 KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.merged.bin
-```
-
-Или из корня репозитория:
+Из корня репозитория:
 
 ```bat
-tools\flash-merged.bat COM7 path\to\KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.merged.bin
+tools\flash-merged.bat COM7 firmware\KONTAKTS_ESP32_S3_LCD_1_47\release\KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.merged.bin
 ```
 
-> [!WARNING]
-> Наблюдавшийся merged BIN имеет полный размер Flash — **16 MiB**. Его следует
-> рассматривать как полный установочный image: запись такого файла может
-> заменить/очистить содержимое других flash-областей, включая пользовательские
-> данные в разделах, которые в image заполнены пустыми значениями. Для обновления
-> только приложения используйте application BIN.
-
-### 2. Только application BIN
-
-Если bootloader и partition table уже соответствуют этой версии сборки, можно
-записать только приложение по адресу, подтверждённому `flash_args`:
+Или напрямую:
 
 ```powershell
-py -m esptool --chip esp32s3 --port COM7 --baud 921600 write-flash 0x10000 KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.bin
+py -m esptool --chip esp32s3 --port COM7 --baud 921600 write-flash 0x0 firmware\KONTAKTS_ESP32_S3_LCD_1_47\release\KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.merged.bin
 ```
 
-Этот способ быстрее и не переписывает bootloader/partition table. Его следует
-использовать только когда layout Flash заведомо совместим.
+Merged image записывается с `0x0`.
+
+> [!WARNING]
+> Наблюдавшийся merged BIN имел размер ровно 16 MiB. Его следует считать полным
+> установочным образом: он может заменить содержимое других flash-разделов.
+
+## Прошивка только application BIN
+
+Если bootloader и partition table уже совместимы:
+
+```powershell
+py -m esptool --chip esp32s3 --port COM7 --baud 921600 write-flash 0x10000 firmware\KONTAKTS_ESP32_S3_LCD_1_47\release\KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.bin
+```
 
 ## SHA-256
 
-Для release обязательно создавайте SHA-256 для обоих BIN.
-
-Из каталога, где лежат release BIN:
+После экспорта:
 
 ```bat
-path\to\repo\tools\make-firmware-hashes.bat
+cd firmware\KONTAKTS_ESP32_S3_LCD_1_47\release
+..\..\..\tools\make-firmware-hashes.bat
 ```
 
-Скрипт создаёт:
+Будет создан:
 
 ```text
 SHA256SUMS.txt
 ```
 
-Документация инструментов:
+Подробно:
 
-[`../../tools/README.md`](../../tools/README.md)
-
-## Рекомендуемая структура работы
-
-Исходник и документацию держим в Git:
-
-```text
-firmware/
-└── KONTAKTS_ESP32_S3_LCD_1_47/
-    ├── KONTAKTS_ESP32_S3_LCD_1_47.ino
-    └── README.md
-```
-
-Arduino IDE может локально создавать внутри sketch-папки:
-
-```text
-build/
-└── esp32.esp32.esp32s3/
-    └── ...generated files...
-```
-
-Эту build-папку **не переносим и не публикуем как часть исходников**. При новой
-сборке она создаётся заново.
-
-Для выпуска версии из неё копируются только:
-
-```text
-KONTAKTS_ESP32_S3_LCD_1_47.ino.bin
-KONTAKTS_ESP32_S3_LCD_1_47.ino.merged.bin
-```
-
-после чего release-копиям присваиваются канонические имена с версией и для них
-генерируется `SHA256SUMS.txt`.
+- [`../../tools/README.md`](../../tools/README.md)
+- [`release/README.md`](release/README.md)
+- [`../../docs/arduino-ide.md`](../../docs/arduino-ide.md)
 
 ## Что делает v0.1.0
 
@@ -247,7 +220,7 @@ KONTAKTS_ESP32_S3_LCD_1_47.ino.merged.bin
 - инициализирует BLE, фиксирует успех и деинициализирует BLE;
 - печатает однократный boot report через `printf()`;
 - не запускает Wi-Fi/BLE scan и фоновые diagnostic tasks;
-- после `setup()` оставляет статический экран и слабую зелёную индикацию RGB.
+- после `setup()` оставляет статический экран и слабую зелёную RGB-индикацию.
 
 ## Hardware target
 
@@ -282,36 +255,9 @@ D2          GPIO17
 D3          GPIO21
 ```
 
-## Build environment
-
-Для текущей линии используется Arduino-ESP32 3.x. Фактический `flash_args`
-наблюдавшейся сборки фиксирует DIO / 80 MHz / 16 MB; точные IDE options следует
-сохранять вместе с build provenance при каждом релизе.
-
-Основной sketch:
-
-[`KONTAKTS_ESP32_S3_LCD_1_47.ino`](KONTAKTS_ESP32_S3_LCD_1_47.ino)
-
-Полная инструкция Arduino IDE:
-
-[`../../docs/arduino-ide.md`](../../docs/arduino-ide.md)
-
-## Factory recovery
-
-Заводской backup и KONTAKTS merged image — разные объекты:
-
-- factory backup — полный raw read 16 MiB с физической платы до замены firmware;
-- KONTAKTS merged image — воспроизводимый установочный image, собранный из нашего
-  исходного кода.
-
-Документация:
-
-- [Firmware backup](../../docs/firmware-backup.md)
-- [Firmware restore](../../docs/firmware-restore.md)
-
 ## Verification status
 
-На реальной плате уже проверены используемые firmware аппаратные пути:
+На реальной плате проверены:
 
 ```text
 ST7789 display path     VERIFIED
@@ -322,5 +268,5 @@ Wi-Fi initialization    VERIFIED
 BLE initialization      VERIFIED
 ```
 
-Объединённая **KONTAKTS_ESP32_S3_LCD_1_47 v0.1.0** также запущена и наблюдалась
-на физической плате. Текущий статус линии — **HARDWARE-VERIFIED**.
+Объединённая **KONTAKTS_ESP32_S3_LCD_1_47 v0.1.0** также запущена на физической
+плате. Текущий статус линии — **HARDWARE-VERIFIED**.
