@@ -29,6 +29,17 @@ PlatformIO и ESP-IDF.
 аналогичные per-device значения — в публичной документации намеренно не
 публикуются и заменяются на `<REDACTED>`.
 
+### Собственная прошивка KONTAKTS
+
+На реальной плате уже запущена **наша собственная прошивка KONTAKTS**, а не
+заводская демонстрационная прошивка Waveshare. Текущая аппаратно проверенная
+линия отображает на экране `KONTAKTS`, модель `ESP32-S3-LCD-1.47`, параметры
+ESP32-S3/Flash/PSRAM/microSD, состояние Wi-Fi/BLE, контроллер ST7789,
+разрешение 172 × 320 и версию firmware.
+
+Заводской полный Flash backup хранится отдельно и нужен только как исходная
+точка восстановления. Его нельзя путать с release-образами KONTAKTS.
+
 ## Что уже подготовлено
 
 Основная прошивка `src/main.cpp` превращает плату в небольшой диагностический
@@ -134,10 +145,31 @@ Raw-снимки хранятся локально в `backup/`, который 
 Публичные примеры содержат только необходимые технические параметры и
 обезличенные значения.
 
-## Arduino IDE
+## Arduino IDE и быстрые BIN-релизы
 
-Инструкция и рекомендуемые параметры находятся в
+Полная инструкция и рекомендуемые параметры находятся в
 [docs/arduino-ide.md](docs/arduino-ide.md).
+
+Arduino IDE позволяет получить сразу два полезных release-файла через
+**Sketch -> Export Compiled Binary**:
+
+- обычный application `.bin`;
+- `.merged.bin` — единый образ с bootloader, partition table и приложением.
+
+Для повторной быстрой прошивки рекомендуется `.merged.bin`: его можно записать
+одной командой `esptool` с адреса `0x0`, без повторной компиляции в Arduino IDE.
+
+Для Windows добавлены:
+
+```text
+tools\flash-merged.bat COM7 path\to\KONTAKTS.merged.bin
+tools\make-firmware-hashes.bat
+```
+
+Первый BAT быстро прошивает готовый merged image через `esptool`, второй
+создаёт `SHA256SUMS.txt` для BIN-файлов в текущем каталоге. В документации также
+приведены команды SHA-256 для PowerShell (`Get-FileHash`), CMD (`certutil`) и
+Linux/macOS (`sha256sum`).
 
 Для первичной проверки можно открыть:
 
@@ -194,7 +226,9 @@ examples/01_display_test/01_display_test.ino
 │   └── roadmap.md
 ├── tools/
 │   ├── backup-factory.ps1
-│   └── read-efuses.ps1
+│   ├── read-efuses.ps1
+│   ├── flash-merged.bat
+│   └── make-firmware-hashes.bat
 ├── platformio.ini
 └── .github/workflows/build.yml
 ```
