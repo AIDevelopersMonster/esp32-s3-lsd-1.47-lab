@@ -1,0 +1,10 @@
+# Third-party source trees and local experiment files must stay local.
+_local/
+
+# Local archives and binaries used only for analysis.
+*.zip
+*.7z
+*.rar
+*.bin
+*.elf
+*.map
