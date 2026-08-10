@@ -487,9 +487,9 @@ include/
 
 ---
 
-# Сборка проекта
+# Сборка проекта через PlatformIO
 
-Проект использует PlatformIO. Конфигурация находится в:
+Проект использует PlatformIO. Конфигурация находится в корневом файле:
 
 ```text
 platformio.ini
@@ -501,22 +501,98 @@ platformio.ini
 waveshare_esp32s3_lcd_147
 ```
 
-Сборка:
+## 1. Перейти в корень проекта
 
-```bash
-pio run
+Команды PlatformIO нужно выполнять не из `src`, а из папки, где лежит `platformio.ini`:
+
+```powershell
+cd C:\Users\CHUWI\Documents\GitHub\lab-esp32-s3-lcd-1.47
 ```
 
-Прошивка:
+Используйте **один терминал для одной сборки**. Не запускайте несколько `pio run`
+одновременно: они используют один и тот же `.pio\build`.
 
-```bash
-pio run -t upload
+## 2. Проверить PlatformIO
+
+Если `pio` доступен напрямую:
+
+```powershell
+pio --version
 ```
 
-Serial Monitor:
+Если обычный PowerShell его не видит:
 
-```bash
-pio device monitor
+```powershell
+& "$env:USERPROFILE\.platformio\penv\Scripts\pio.exe" --version
+```
+
+## 3. Собрать проект
+
+```powershell
+& "$env:USERPROFILE\.platformio\penv\Scripts\pio.exe" run
+```
+
+На первой сборке PlatformIO может устанавливать платформу, компилятор, Arduino
+framework и библиотеки. Не запускайте второй процесс, пока первый не завершился.
+
+Нормальное окончание:
+
+```text
+========================= [SUCCESS] =========================
+```
+
+Основной результат сборки создаётся в:
+
+```text
+.pio\build\waveshare_esp32s3_lcd_147\firmware.bin
+```
+
+## 4. Очистка после прерванной или конфликтующей сборки
+
+Если сборка была прервана, либо несколько терминалов одновременно запускали
+PlatformIO, сначала выполните:
+
+```powershell
+& "$env:USERPROFILE\.platformio\penv\Scripts\pio.exe" run -t clean
+```
+
+После `SUCCESS` снова:
+
+```powershell
+& "$env:USERPROFILE\.platformio\penv\Scripts\pio.exe" run
+```
+
+Этот порядок реально проверен в проекте после ошибки линковки с отсутствующими
+объектными файлами Wi-Fi.
+
+## 5. Найти порт
+
+```powershell
+& "$env:USERPROFILE\.platformio\penv\Scripts\pio.exe" device list
+```
+
+Номер COM-порта может меняться. В проверенном сеансе использовался `COM16`.
+
+## 6. Прошить плату
+
+Пример для `COM16`:
+
+```powershell
+& "$env:USERPROFILE\.platformio\penv\Scripts\pio.exe" run -t upload --upload-port COM16
+```
+
+Успешная прошивка заканчивается проверкой записанных данных и сообщениями типа:
+
+```text
+Hash of data verified.
+Hard resetting via RTS pin...
+========================= [SUCCESS] =========================
+```
+
+## 7. Открыть Serial Monitor
+
+```powershell
+& "$env:USERPROFILE\.platformio\penv\Scripts\pio.exe" device monitor --port COM16
 ```
 
 Скорость Serial:
@@ -524,6 +600,25 @@ pio device monitor
 ```text
 115200 baud
 ```
+
+## Проверенная последовательность
+
+```text
+редактируем src/main.cpp
+        ↓
+pio run
+        ↓
+SUCCESS
+        ↓
+pio run -t upload --upload-port COMxx
+        ↓
+Hash of data verified / SUCCESS
+        ↓
+pio device monitor --port COMxx
+```
+
+[Видео: сборка и программирование ESP32-S3-LCD-1.47 через PlatformIO](https://youtube.com/shorts/qIY_et3dHcA)
+— реальный успешный цикл сборки, записи Flash, проверки данных и reset платы.
 
 ---
 
