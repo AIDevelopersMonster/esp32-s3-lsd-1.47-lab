@@ -1,0 +1,95 @@
+#include "SD_Card.h"
+
+bool SDCard_Flag;
+bool SDCard_Finish;
+
+uint16_t SDCard_Size;
+uint16_t Flash_Size;
+
+void SD_Init()
+{
+  SDCard_Flag = false;
+  SDCard_Size = 0;
+
+  if (!SD_MMC.setPins(SD_CLK_PIN, SD_CMD_PIN, SD_D0_PIN, SD_D1_PIN, SD_D2_PIN, SD_D3_PIN)) {
+    return;
+  }
+
+  // 4-bit SD_MMC, no automatic formatting on mount failure.
+  if (!SD_MMC.begin("/sdcard", false)) {
+    return;
+  }
+
+  if (SD_MMC.cardType() == CARD_NONE) {
+    return;
+  }
+
+  SDCard_Size = SD_MMC.totalBytes() / (1024 * 1024);
+  SDCard_Flag = true;
+}
+bool File_Search(const char* directory, const char* fileName)    
+{
+  File Path = SD_MMC.open(directory);
+  if (!Path) {
+    printf("Path: <%s> does not exist\r\n",directory);
+    return false;
+  }
+  File file = Path.openNextFile();
+  while (file) {
+    if (strcmp(file.name(), fileName) == 0) {                           
+      if (strcmp(directory, "/") == 0)
+        printf("File '%s%s' found in root directory.\r\n",directory,fileName);  
+      else
+        printf("File '%s/%s' found in root directory.\r\n",directory,fileName); 
+      Path.close();                                                     
+      return true;                                                     
+    }
+    file = Path.openNextFile();                                        
+  }
+  if (strcmp(directory, "/") == 0)
+    printf("File '%s%s' not found in root directory.\r\n",directory,fileName);           
+  else
+    printf("File '%s/%s' not found in root directory.\r\n",directory,fileName);          
+  Path.close();                                                         
+  return false;                                                         
+}
+uint16_t Folder_retrieval(const char* directory, const char* fileExtension, char File_Name[][100],uint16_t maxFiles)    
+{
+  File Path = SD_MMC.open(directory);
+  if (!Path) {
+    printf("Path: <%s> does not exist\r\n",directory);
+    return false;
+  }
+  
+  uint16_t fileCount = 0;
+  char filePath[100];
+  File file = Path.openNextFile();
+  while (file && fileCount < maxFiles) {
+    if (!file.isDirectory() && strstr(file.name(), fileExtension)) {
+      strncpy(File_Name[fileCount], file.name(), sizeof(File_Name[fileCount])); 
+      if (strcmp(directory, "/") == 0) {                                      
+        snprintf(filePath, 100, "%s%s", directory, file.name());   
+      } else {                                                            
+        snprintf(filePath, 100, "%s/%s", directory, file.name());
+      }
+      printf("File found: %s\r\n", filePath);
+      fileCount++;
+    }
+    file = Path.openNextFile();                                      
+  }
+  Path.close();                                                         
+  if (fileCount > 0) {
+    printf("%d <%s> files were retrieved\r\n",fileCount,fileExtension);
+    return fileCount;                                                 
+  } else {
+    printf("No files with extension '%s' found in directory: %s\r\n", fileExtension, directory);
+    return 0;                                                         
+  }
+}
+
+void remove_file_extension(char *file_name) {
+  char *last_dot = strrchr(file_name, '.');
+  if (last_dot != NULL) {
+    *last_dot = '\0'; 
+  }
+}
