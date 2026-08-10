@@ -1,3 +1,24 @@
+/*
+ * Vendor-derived source from the Waveshare ESP32-S3-LCD-1.47 LCD_Image demo.
+ * Original top-level sketch: Copyright (c) 2024 Waveshare, MIT License.
+ * See LCD_Image.ino and LICENSE-MIT.txt for attribution and license text.
+ *
+ * Local compatibility changes, hardware-verified with:
+ *   - esp32 by Espressif Systems 3.3.11
+ *   - PNGdec 1.1.6
+ *
+ * Changes in this file:
+ *   1. PNG draw callback returns int, as required by PNGdec 1.1.6.
+ *   2. RGB565 line buffer is rounded up to an 8-pixel boundary (172 -> 176).
+ *   3. RGBA conversion uses an explicit white background (0x00FFFFFF).
+ *   4. LCD window end X is inclusive, so width uses iWidth - 1.
+ *   5. Y positioning consistently includes ypos.
+ *
+ * The downloaded vendor example did not run unchanged in the tested software
+ * environment. This may reflect dependency/API drift relative to the original
+ * vendor development environment; no claim is made that all vendor versions
+ * are affected.
+ */
 #include "LCD_Image.h"
   
 PNG png;
@@ -38,10 +59,18 @@ int32_t pngSeek(PNGFILE *page, int32_t position) {
 // render each image line to the TFT.  If you use a different TFT library
 // you will need to adapt this function to suit.
 // Callback function to draw pixels to the display
+//
+// Local compatibility note:
+// MAX_IMAGE_WIDTH is 172, but this buffer is rounded to 176 entries. This
+// provides a safe 8-pixel-aligned line buffer for the tested ESP32-S3/PNGdec
+// 1.1.6 conversion path while only the actual pDraw->iWidth pixels are sent.
 static uint16_t lineBuffer[(MAX_IMAGE_WIDTH + 7) & ~7];
 
 int pngDraw(PNGDRAW *pDraw)
 {
+  // Explicit RGB background keeps RGBA PNG conversion on a path that behaved
+  // correctly in the tested PNGdec 1.1.6 environment. The original example
+  // used 0xFFFFFFFF and reproducibly stopped on the first RGBA PNG here.
   png.getLineAsRGB565(
       pDraw,
       lineBuffer,
@@ -57,6 +86,8 @@ int pngDraw(PNGDRAW *pDraw)
          ((lineBuffer[i] << 8) & 0xFF00));
   }
 
+  // LCD_addWindow() treats both end coordinates as inclusive. Therefore a
+  // 172-pixel line beginning at x=0 ends at x=171, not x=172.
   LCD_addWindow(
       xpos,
       ypos + pDraw->y,
@@ -65,6 +96,7 @@ int pngDraw(PNGDRAW *pDraw)
       lineBuffer
   );
 
+  // PNGdec 1.1.6 expects an int callback result; non-zero continues decoding.
   return 1;
 }
 /////////////////////////////////////////////////////////////////
