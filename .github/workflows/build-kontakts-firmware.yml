@@ -42,17 +42,20 @@ jobs:
             --build-path build \
             firmware/KONTAKTS_ESP32_S3_LCD_1_47
 
-      - name: Prepare merged firmware image
+      - name: Prepare canonical release files
         run: |
+          test -f build/KONTAKTS_ESP32_S3_LCD_1_47.ino.bin
           test -f build/KONTAKTS_ESP32_S3_LCD_1_47.ino.merged.bin
-          cp build/KONTAKTS_ESP32_S3_LCD_1_47.ino.merged.bin KONTAKTS_ESP32-S3-LCD-1.47.bin
-          sha256sum KONTAKTS_ESP32-S3-LCD-1.47.bin > KONTAKTS_ESP32-S3-LCD-1.47.bin.sha256
+          cp build/KONTAKTS_ESP32_S3_LCD_1_47.ino.bin KONTAKTS_ESP32_S3_LCD_1_47.bin
+          cp build/KONTAKTS_ESP32_S3_LCD_1_47.ino.merged.bin KONTAKTS_ESP32_S3_LCD_1_47.merged.bin
+          sha256sum KONTAKTS_ESP32_S3_LCD_1_47.bin KONTAKTS_ESP32_S3_LCD_1_47.merged.bin > SHA256SUMS.txt
 
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v4
         with:
-          name: KONTAKTS_ESP32-S3-LCD-1.47
+          name: KONTAKTS_ESP32_S3_LCD_1_47
           path: |
-            KONTAKTS_ESP32-S3-LCD-1.47.bin
-            KONTAKTS_ESP32-S3-LCD-1.47.bin.sha256
+            KONTAKTS_ESP32_S3_LCD_1_47.bin
+            KONTAKTS_ESP32_S3_LCD_1_47.merged.bin
+            SHA256SUMS.txt
           if-no-files-found: error
