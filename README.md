@@ -40,6 +40,9 @@ ESP32-S3/Flash/PSRAM/microSD, состояние Wi-Fi/BLE, контроллер
 [Видео: прошивка KONTAKTS v0.1.0 через merged BIN и BAT-скрипт](https://www.youtube.com/shorts/Dy9VAgI30Wk)
 — реальная установка нашей release-прошивки на Waveshare ESP32-S3-LCD-1.47.
 
+[Видео: сборка и программирование ESP32-S3-LCD-1.47 через PlatformIO](https://youtube.com/shorts/qIY_et3dHcA)
+— аппаратно проверенный цикл `pio run` → `upload` с успешной записью и проверкой Flash.
+
 Заводской полный Flash backup хранится отдельно и нужен только как исходная
 точка восстановления. Его нельзя путать с release-образами KONTAKTS.
 
@@ -59,20 +62,117 @@ ESP32-S3/Flash/PSRAM/microSD, состояние Wi-Fi/BLE, контроллер
 Перед первой собственной прошивкой рекомендуется сохранить полный заводской
 образ Flash и снимок eFuse.
 
-## Быстрый старт в PlatformIO
+## Проверенный порядок сборки и прошивки в PlatformIO
 
-1. Установите VS Code и расширение PlatformIO.
-2. Откройте папку проекта.
-3. Подключите плату через USB-удлинитель или USB-хаб.
-4. Сначала сохраните заводскую прошивку по инструкции
-   [docs/firmware-backup.md](docs/firmware-backup.md).
-5. Выполните:
+Проект собирается из корневой папки, где находится [`platformio.ini`](platformio.ini).
+Для Windows/PowerShell рекомендуемый порядок такой.
 
-```bash
-pio run
-pio run -t upload
-pio device monitor
+### 1. Открыть один терминал и перейти в корень проекта
+
+```powershell
+cd C:\Users\CHUWI\Documents\GitHub\lab-esp32-s3-lcd-1.47
 ```
+
+Не запускайте несколько `pio run` одновременно для одного и того же проекта:
+процессы используют общий каталог `.pio\build` и могут помешать друг другу.
+
+### 2. Проверить PlatformIO Core
+
+Если `pio` уже доступен в `PATH`:
+
+```powershell
+pio --version
+```
+
+Если обычный PowerShell не видит `pio`, встроенный PlatformIO Core можно вызвать напрямую:
+
+```powershell
+& "$env:USERPROFILE\.platformio\penv\Scripts\pio.exe" --version
+```
+
+В VS Code также можно открыть **PlatformIO → Miscellaneous → PlatformIO Core CLI**.
+
+### 3. Первая сборка
+
+```powershell
+& "$env:USERPROFILE\.platformio\penv\Scripts\pio.exe" run
+```
+
+При первом запуске PlatformIO может долго устанавливать платформу, toolchain,
+Arduino-ESP32 и зависимости из `platformio.ini`. Это нормально. Дождитесь окончания
+одного процесса и не запускайте параллельные сборки.
+
+Успешный результат заканчивается строкой вида:
+
+```text
+========================= [SUCCESS] =========================
+```
+
+### 4. Если предыдущая сборка была прервана или несколько сборок шли параллельно
+
+Сначала очистите только промежуточные результаты проекта:
+
+```powershell
+& "$env:USERPROFILE\.platformio\penv\Scripts\pio.exe" run -t clean
+```
+
+После `SUCCESS` у `clean` снова выполните обычную сборку:
+
+```powershell
+& "$env:USERPROFILE\.platformio\penv\Scripts\pio.exe" run
+```
+
+Так был устранён реальный случай, когда линковщик не находил промежуточные
+объектные файлы Wi-Fi (`AP.cpp.o`, `STA.cpp.o`, `WiFi.cpp.o`, `WiFiAP.cpp.o`)
+после нескольких одновременно запущенных процессов.
+
+### 5. Найти COM-порт платы
+
+```powershell
+& "$env:USERPROFILE\.platformio\penv\Scripts\pio.exe" device list
+```
+
+На конкретном рабочем экземпляре во время проверки использовался `COM16`, но
+номер порта на другом компьютере или после переподключения может отличаться.
+
+### 6. Собрать и прошить плату
+
+Пример для `COM16`:
+
+```powershell
+& "$env:USERPROFILE\.platformio\penv\Scripts\pio.exe" run -t upload --upload-port COM16
+```
+
+PlatformIO при необходимости пересобирает проект, запускает `esptool`, записывает
+Flash, проверяет записанные данные и выполняет аппаратный reset. Проверенная
+успешная прошивка завершилась сообщениями `Hash of data verified`,
+`Hard resetting via RTS pin...` и `[SUCCESS]`.
+
+### 7. Открыть Serial Monitor
+
+```powershell
+& "$env:USERPROFILE\.platformio\penv\Scripts\pio.exe" device monitor --port COM16
+```
+
+Скорость монитора уже задана в `platformio.ini` как `115200` baud.
+
+### Короткая схема рабочего цикла
+
+```text
+редактирование src/main.cpp
+        ↓
+pio run
+        ↓
+SUCCESS
+        ↓
+pio run -t upload --upload-port COMxx
+        ↓
+Hash of data verified / SUCCESS
+        ↓
+pio device monitor --port COMxx
+```
+
+[Видео: полный проверенный цикл сборки и программирования через PlatformIO](https://youtube.com/shorts/qIY_et3dHcA)
 
 В [`platformio.ini`](platformio.ini) закреплена среда Arduino-ESP32 3.x. Официальная документация
 Waveshare требует пакет ESP32 версии не ниже 3.0.2.
