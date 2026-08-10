@@ -1,58 +1,253 @@
 # KONTAKTS_ESP32_S3_LCD_1_47 firmware
 
-Independent project firmware for the **Waveshare ESP32-S3-LCD-1.47**.
+Собственная прошивка проекта для **Waveshare ESP32-S3-LCD-1.47 (USB-A variant)**.
+Это независимо написанная прошивка KONTAKTS, а не заводская firmware Waveshare
+и не переименованная копия vendor demo.
 
-This is our project firmware, not the Waveshare factory firmware and not a renamed copy of the vendor demo. It is an independently written Arduino-ESP32 application built on hardware behavior verified in this repository.
-
-Current version:
+Текущая версия:
 
 ```text
 0.1.0
 ```
 
-Canonical firmware/project identifier:
+Канонический идентификатор прошивки:
 
 ```text
 KONTAKTS_ESP32_S3_LCD_1_47
 ```
 
-Keep this underscore form for sketch/build/release file names. The human-readable board model remains `ESP32-S3-LCD-1.47`.
+Для исходного Arduino sketch, каталогов и release-файлов используем именно эту
+underscore-форму. Человекочитаемое название платы остаётся
+`ESP32-S3-LCD-1.47`.
 
-## Release file names
+## Что хранить, а что не хранить
 
-For each Arduino export keep both useful BIN files and rename them to the canonical project name:
+**Не нужно переносить в репозиторий весь каталог `build/`, созданный Arduino
+IDE.** Это воспроизводимые промежуточные файлы, среди которых есть большие
+`.elf`, `.map`, `sdkconfig` и другие служебные результаты сборки.
+
+Для готовой версии прошивки достаточно сохранить два BIN-файла:
 
 ```text
-KONTAKTS_ESP32_S3_LCD_1_47.bin
-KONTAKTS_ESP32_S3_LCD_1_47.merged.bin
+KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.bin
+KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.merged.bin
+```
+
+Первый — только application image. Второй — объединённый 16 MiB образ для
+однофайловой прошивки с адреса `0x0`.
+
+Дополнительно для публикации рекомендуется создать:
+
+```text
 SHA256SUMS.txt
 ```
 
-- `KONTAKTS_ESP32_S3_LCD_1_47.bin` — application image only;
-- `KONTAKTS_ESP32_S3_LCD_1_47.merged.bin` — preferred one-file image containing bootloader, partition table and application at their normal ESP32-S3 offsets;
-- `SHA256SUMS.txt` — SHA-256 hashes of the release BIN files.
+То есть минимальный release-набор — **2 BIN + SHA256SUMS.txt**.
 
-Arduino/Arduino CLI can initially generate names containing `.ino`, for example:
+> [!NOTE]
+> В корневом `.gitignore` проекта BIN-файлы намеренно игнорируются. Это удобно:
+> автоматически созданные binaries не засоряют историю Git. Для распространения
+> готовых версий лучше прикладывать два BIN и `SHA256SUMS.txt` к **GitHub Release**,
+> а не коммитить новый 16 MiB merged image в Git при каждой версии.
+
+## Какие два файла брать из Arduino IDE
+
+Из фактического каталога Arduino IDE:
+
+```text
+build/esp32.esp32.esp32s3/
+```
+
+нужны эти два свежих результата сборки:
 
 ```text
 KONTAKTS_ESP32_S3_LCD_1_47.ino.bin
 KONTAKTS_ESP32_S3_LCD_1_47.ino.merged.bin
 ```
 
-Those are build-output names. For release/distribution the repository uses the cleaner canonical names shown above.
+Для release-копий убираем `.ino` из имени и добавляем номер версии:
 
-## v0.1 goals
+```text
+KONTAKTS_ESP32_S3_LCD_1_47.ino.bin
+    -> KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.bin
 
-The first version is intentionally small and deterministic:
+KONTAKTS_ESP32_S3_LCD_1_47.ino.merged.bin
+    -> KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.merged.bin
+```
 
-- show a KONTAKTS board-information screen on the built-in ST7789 LCD;
-- report the ESP32-S3, Flash, PSRAM, display and microSD state;
-- mount the built-in microSD slot in the hardware-verified 4-bit SD_MMC mode;
-- initialize Wi-Fi once, record success, then turn Wi-Fi off;
-- initialize BLE once, record success, then deinitialize BLE;
-- print a one-shot boot report with `printf()`;
-- keep Wi-Fi/BLE scans and background diagnostic tasks out of the firmware;
-- leave the running firmware static after `setup()` except for the retained LCD image and a small RGB status indication.
+Исходные имена Arduino IDE можно не менять внутри `build/`; переименовываются
+только release-копии.
+
+## Файлы, создаваемые Arduino IDE
+
+Ниже перечислены файлы, реально наблюдавшиеся в сборке
+`KONTAKTS_ESP32_S3_LCD_1_47 v0.1.0`.
+
+| Файл | Назначение | Нужен в release? |
+|---|---|---|
+| `boot_app0.bin` | Служебный boot/OTA image Arduino-ESP32. В данной сборке `flash_args` записывает его по адресу `0xE000`. | Нет отдельно, уже включён в merged BIN |
+| `build.options.json` | Параметры конкретной сборки Arduino IDE; полезен для диагностики воспроизводимости. | Обычно нет |
+| `flash_args` | Точные параметры и адреса, которые Arduino/esptool используют для записи этой сборки. | Нет, но его содержание документировано ниже |
+| `KONTAKTS_ESP32_S3_LCD_1_47.ino.bin` | Основное приложение KONTAKTS. В этой сборке записывается по адресу `0x10000`. | **Да** |
+| `KONTAKTS_ESP32_S3_LCD_1_47.ino.bootloader.bin` | Bootloader ESP32-S3 для этой конфигурации сборки. | Нет отдельно, включён в merged BIN |
+| `KONTAKTS_ESP32_S3_LCD_1_47.ino.elf` | ELF с кодом, символами и секциями. Нужен для отладки, symbol lookup и анализа crash/backtrace. | Нет |
+| `KONTAKTS_ESP32_S3_LCD_1_47.ino.map` | Linker map: карта размещения функций, данных и секций в памяти. | Нет |
+| `KONTAKTS_ESP32_S3_LCD_1_47.ino.merged.bin` | Объединённый flash image: bootloader + partitions + boot_app0 + application в правильных offsets. В наблюдавшейся сборке имеет размер ровно 16 MiB. | **Да, основной файл для простой прошивки** |
+| `KONTAKTS_ESP32_S3_LCD_1_47.ino.partitions.bin` | Бинарная таблица разделов ESP32-S3. В этой сборке записывается по адресу `0x8000`. | Нет отдельно, включена в merged BIN |
+| `partitions.csv` | Текстовое описание partition table, из которого формируется `partitions.bin`. | Обычно нет |
+| `sdkconfig` | Автоматически сформированная конфигурация ESP32/Arduino build environment. | Нет |
+
+### Файлы с `_flashed` в имени
+
+В рабочем каталоге также наблюдались:
+
+```text
+KONTAKTS_ESP32_S3_LCD_1_47.ino.bootloader_flashed.bin
+KONTAKTS_ESP32_S3_LCD_1_47.ino.partitions_flashed.bin
+KONTAKTS_ESP32_S3_LCD_1_47.ino_flashed.bin
+```
+
+Они имеют более ранние timestamps, чем текущая свежая сборка, и **не входят в
+актуальный `flash_args` Arduino IDE**. Поэтому они не считаются обязательными
+release-артефактами и не должны подменять свежие `.ino.bin`,
+`.ino.partitions.bin` или `.ino.bootloader.bin` без отдельно зафиксированного
+происхождения. Для обычного release их не переносим.
+
+## Точные flash offsets этой сборки
+
+Фактический `flash_args`, полученный из Arduino IDE, содержит:
+
+```text
+--flash-mode dio --flash-freq 80m --flash-size 16MB
+0x0     KONTAKTS_ESP32_S3_LCD_1_47.ino.bootloader.bin
+0x8000  KONTAKTS_ESP32_S3_LCD_1_47.ino.partitions.bin
+0xe000  boot_app0.bin
+0x10000 KONTAKTS_ESP32_S3_LCD_1_47.ino.bin
+```
+
+Таким образом, для **именно этой аппаратно проверяемой сборки** адрес
+application image не предполагается, а известен точно:
+
+```text
+application offset = 0x10000
+```
+
+Также важно, что данный `flash_args` сообщает:
+
+```text
+flash mode = DIO
+flash frequency = 80 MHz
+flash size = 16 MB
+```
+
+Эти значения следует считать фактическими параметрами данной Arduino IDE
+сборки при воспроизведении или диагностике.
+
+## Два способа прошивки
+
+### 1. Рекомендуемый простой способ: merged BIN
+
+Для чистой полной установки используйте:
+
+```text
+KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.merged.bin
+```
+
+Запись начинается с `0x0`:
+
+```powershell
+py -m esptool --chip esp32s3 --port COM7 --baud 921600 write-flash 0x0 KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.merged.bin
+```
+
+Или из корня репозитория:
+
+```bat
+tools\flash-merged.bat COM7 path\to\KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.merged.bin
+```
+
+> [!WARNING]
+> Наблюдавшийся merged BIN имеет полный размер Flash — **16 MiB**. Его следует
+> рассматривать как полный установочный image: запись такого файла может
+> заменить/очистить содержимое других flash-областей, включая пользовательские
+> данные в разделах, которые в image заполнены пустыми значениями. Для обновления
+> только приложения используйте application BIN.
+
+### 2. Только application BIN
+
+Если bootloader и partition table уже соответствуют этой версии сборки, можно
+записать только приложение по адресу, подтверждённому `flash_args`:
+
+```powershell
+py -m esptool --chip esp32s3 --port COM7 --baud 921600 write-flash 0x10000 KONTAKTS_ESP32_S3_LCD_1_47_v0.1.0.bin
+```
+
+Этот способ быстрее и не переписывает bootloader/partition table. Его следует
+использовать только когда layout Flash заведомо совместим.
+
+## SHA-256
+
+Для release обязательно создавайте SHA-256 для обоих BIN.
+
+Из каталога, где лежат release BIN:
+
+```bat
+path\to\repo\tools\make-firmware-hashes.bat
+```
+
+Скрипт создаёт:
+
+```text
+SHA256SUMS.txt
+```
+
+Документация инструментов:
+
+[`../../tools/README.md`](../../tools/README.md)
+
+## Рекомендуемая структура работы
+
+Исходник и документацию держим в Git:
+
+```text
+firmware/
+└── KONTAKTS_ESP32_S3_LCD_1_47/
+    ├── KONTAKTS_ESP32_S3_LCD_1_47.ino
+    └── README.md
+```
+
+Arduino IDE может локально создавать внутри sketch-папки:
+
+```text
+build/
+└── esp32.esp32.esp32s3/
+    └── ...generated files...
+```
+
+Эту build-папку **не переносим и не публикуем как часть исходников**. При новой
+сборке она создаётся заново.
+
+Для выпуска версии из неё копируются только:
+
+```text
+KONTAKTS_ESP32_S3_LCD_1_47.ino.bin
+KONTAKTS_ESP32_S3_LCD_1_47.ino.merged.bin
+```
+
+после чего release-копиям присваиваются канонические имена с версией и для них
+генерируется `SHA256SUMS.txt`.
+
+## Что делает v0.1.0
+
+Первая версия намеренно компактная и детерминированная:
+
+- выводит информационный экран KONTAKTS на встроенный ST7789;
+- показывает ESP32-S3, Flash, PSRAM, display и состояние microSD;
+- монтирует microSD через аппаратно проверенный 4-bit SD_MMC;
+- инициализирует Wi-Fi, фиксирует успех и сразу выключает Wi-Fi;
+- инициализирует BLE, фиксирует успех и деинициализирует BLE;
+- печатает однократный boot report через `printf()`;
+- не запускает Wi-Fi/BLE scan и фоновые diagnostic tasks;
+- после `setup()` оставляет статический экран и слабую зелёную индикацию RGB.
 
 ## Hardware target
 
@@ -65,7 +260,7 @@ Display     ST7789 IPS, 172 x 320
 RGB LED     GPIO38
 ```
 
-Verified LCD wiring used by the firmware:
+LCD:
 
 ```text
 MOSI        GPIO45
@@ -76,7 +271,7 @@ RESET       GPIO39
 Backlight   GPIO48
 ```
 
-Verified microSD wiring:
+microSD:
 
 ```text
 CMD         GPIO15
@@ -89,113 +284,34 @@ D3          GPIO21
 
 ## Build environment
 
-The project build is pinned to:
+Для текущей линии используется Arduino-ESP32 3.x. Фактический `flash_args`
+наблюдавшейся сборки фиксирует DIO / 80 MHz / 16 MB; точные IDE options следует
+сохранять вместе с build provenance при каждом релизе.
 
-```text
-esp32 by Espressif Systems  3.3.11
-Board                       ESP32S3 Dev Module
-CPU                         240 MHz
-Flash mode                  QIO
-Flash size                  16 MB
-PSRAM                       OPI PSRAM
-USB                         Hardware CDC/JTAG
-```
-
-Required Arduino libraries:
-
-```text
-Adafruit GFX Library
-Adafruit ST7735 and ST7789 Library
-```
-
-The source does not require LVGL. LVGL 8.3.10 remains documented under the adapted vendor example, but this KONTAKTS firmware deliberately starts from the independently verified minimal ST7789 path instead.
-
-## Reproducible GitHub build
-
-The repository contains:
-
-[`../../.github/workflows/build-kontakts-firmware.yml`](../../.github/workflows/build-kontakts-firmware.yml)
-
-The workflow installs Arduino CLI, pins Arduino-ESP32 3.3.11, installs the required display libraries, compiles the firmware and exports both release images:
-
-```text
-KONTAKTS_ESP32_S3_LCD_1_47.bin
-KONTAKTS_ESP32_S3_LCD_1_47.merged.bin
-SHA256SUMS.txt
-```
-
-## Build two BIN files in Arduino IDE
-
-Open:
+Основной sketch:
 
 [`KONTAKTS_ESP32_S3_LCD_1_47.ino`](KONTAKTS_ESP32_S3_LCD_1_47.ino)
 
-Then use:
-
-```text
-Sketch -> Export Compiled Binary
-```
-
-Arduino IDE exports an application BIN and a merged BIN. If the raw generated names contain `.ino`, rename the release copies to the canonical names above.
-
-Full Arduino IDE settings and commands:
+Полная инструкция Arduino IDE:
 
 [`../../docs/arduino-ide.md`](../../docs/arduino-ide.md)
 
-## SHA-256
-
-From the directory containing both release BIN files, run:
-
-```bat
-..\..\tools\make-firmware-hashes.bat
-```
-
-This creates:
-
-```text
-SHA256SUMS.txt
-```
-
-## Flashing the merged image
-
-The merged image is intended to be written from offset `0x0`.
-
-From the repository root on Windows:
-
-```bat
-tools\flash-merged.bat COM7 firmware\KONTAKTS_ESP32_S3_LCD_1_47\KONTAKTS_ESP32_S3_LCD_1_47.merged.bin
-```
-
-Or directly with esptool 5.x:
-
-```powershell
-py -m esptool `
-    --chip esp32s3 `
-    --port COM7 `
-    --baud 921600 `
-    write-flash `
-    0x0 .\firmware\KONTAKTS_ESP32_S3_LCD_1_47\KONTAKTS_ESP32_S3_LCD_1_47.merged.bin
-```
-
-Change `COM7` to the actual port of your board.
-
-A separate `erase-flash` step is not required for this operation; `write-flash` erases the sectors it needs to replace.
-
 ## Factory recovery
 
-Before flashing this firmware, keep the already verified factory backup in a safe location. The project documentation is here:
+Заводской backup и KONTAKTS merged image — разные объекты:
+
+- factory backup — полный raw read 16 MiB с физической платы до замены firmware;
+- KONTAKTS merged image — воспроизводимый установочный image, собранный из нашего
+  исходного кода.
+
+Документация:
 
 - [Firmware backup](../../docs/firmware-backup.md)
 - [Firmware restore](../../docs/firmware-restore.md)
 
-The factory backup and the KONTAKTS merged project firmware are different objects:
-
-- the factory backup is a full raw 16 MiB read of a tested physical board state;
-- the KONTAKTS merged image is a reproducible firmware generated from source.
-
 ## Verification status
 
-The individual hardware paths used by the firmware have been verified on the physical board:
+На реальной плате уже проверены используемые firmware аппаратные пути:
 
 ```text
 ST7789 display path     VERIFIED
@@ -206,14 +322,5 @@ Wi-Fi initialization    VERIFIED
 BLE initialization      VERIFIED
 ```
 
-The combined **KONTAKTS_ESP32_S3_LCD_1_47 v0.1.0** firmware has also been flashed and observed on the real board. The current v0.1.0 line is therefore **HARDWARE-VERIFIED**.
-
-## Source
-
-Main sketch:
-
-[`KONTAKTS_ESP32_S3_LCD_1_47.ino`](KONTAKTS_ESP32_S3_LCD_1_47.ino)
-
-Project repository:
-
-https://github.com/AIDevelopersMonster/lab-esp32-s3-lcd-1.47
+Объединённая **KONTAKTS_ESP32_S3_LCD_1_47 v0.1.0** также запущена и наблюдалась
+на физической плате. Текущий статус линии — **HARDWARE-VERIFIED**.
