@@ -85,6 +85,77 @@ ST7789 output: VERIFIED
 RGB LED loop: VERIFIED AS PART OF THE RUNNING EXAMPLE
 ```
 
+## Hardware verification video
+
+A real-board run of the adapted example is shown here:
+
+**[ESP32-S3-LCD-1.47 — Waveshare LCD_Image adapted for PNGdec 1.1.6](https://youtube.com/shorts/QMOJmMdq3DU)**
+
+The video and Serial Monitor output confirm that the slideshow continues through
+both ordinary RGB PNG files (`pixel type: 2`) and RGBA PNG files
+(`pixel type: 6`) instead of stopping on the RGBA path.
+
+Representative output from the hardware-verified run:
+
+```text
+ESP-ROM:esp32s3-20210327
+
+File found: /2.png
+File found: /3.png
+File found: /4.png
+File found: /5.png
+File found: /6.png
+File found: /8.png
+File found: /9.png
+File found: /10.png
+File found: /1.png
+File found: /7.png
+10 <.png> files were retrieved
+
+Show  : /8.png
+Currently display picture /8.png
+image specs: (172 x 320), 8 bpp, pixel type: 6
+90 ms
+
+Show  : /9.png
+Currently display picture /9.png
+image specs: (172 x 320), 8 bpp, pixel type: 6
+90 ms
+
+Show  : /10.png
+Currently display picture /10.png
+image specs: (172 x 320), 8 bpp, pixel type: 2
+138 ms
+
+Show  : /1.png
+Currently display picture /1.png
+image specs: (172 x 320), 8 bpp, pixel type: 2
+147 ms
+
+Show  : /7.png
+Currently display picture /7.png
+image specs: (172 x 320), 8 bpp, pixel type: 2
+82 ms
+
+Show  : /2.png
+Currently display picture /2.png
+image specs: (172 x 320), 8 bpp, pixel type: 6
+165 ms
+
+Show  : /3.png
+Currently display picture /3.png
+image specs: (172 x 320), 8 bpp, pixel type: 2
+111 ms
+```
+
+The complete observed run continued cycling repeatedly through the same image
+set, including `pixel type: 6` images, without the previous freeze.
+
+Note: `7.png` appears as `pixel type: 2` in this log because that test image had
+been re-saved without an alpha channel during diagnosis. Other unchanged RGBA
+images such as `2.png`, `8.png`, and `9.png` remained `pixel type: 6` and were
+displayed successfully after the code changes.
+
 ## Local changes relative to the downloaded Waveshare example
 
 ### `SD_Card.cpp`
