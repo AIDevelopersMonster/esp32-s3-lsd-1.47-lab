@@ -12,10 +12,25 @@
 
 ```text
 lab-esp32-s3-lcd-1.47\
+├── firmware\
 ├── tools\
 ├── docs\
 ├── src\
 └── platformio.ini
+```
+
+Каноническое имя нашей прошивки и release-файлов:
+
+```text
+KONTAKTS_ESP32_S3_LCD_1_47
+```
+
+Для release используются:
+
+```text
+KONTAKTS_ESP32_S3_LCD_1_47.bin
+KONTAKTS_ESP32_S3_LCD_1_47.merged.bin
+SHA256SUMS.txt
 ```
 
 ### Быстрая прошивка merged BIN
@@ -23,13 +38,7 @@ lab-esp32-s3-lcd-1.47\
 Из корня репозитория:
 
 ```bat
-tools\flash-merged.bat COM7 path\to\KONTAKTS.merged.bin
-```
-
-Например, если BIN лежит в папке `firmware`:
-
-```bat
-tools\flash-merged.bat COM7 firmware\KONTAKTS.merged.bin
+tools\flash-merged.bat COM7 firmware\KONTAKTS_ESP32_S3_LCD_1_47\KONTAKTS_ESP32_S3_LCD_1_47.merged.bin
 ```
 
 Сам [`flash-merged.bat`](flash-merged.bat) можно запускать и из папки `tools`,
@@ -37,26 +46,21 @@ tools\flash-merged.bat COM7 firmware\KONTAKTS.merged.bin
 Например:
 
 ```bat
-flash-merged.bat COM7 ..\firmware\KONTAKTS.merged.bin
+flash-merged.bat COM7 ..\firmware\KONTAKTS_ESP32_S3_LCD_1_47\KONTAKTS_ESP32_S3_LCD_1_47.merged.bin
 ```
+
+Merged-образ всегда записывается с адреса `0x0`.
 
 ### Создание SHA-256 для BIN-файлов
 
 [`make-firmware-hashes.bat`](make-firmware-hashes.bat) обрабатывает `.bin` файлы
 **в текущей рабочей папке**, а не автоматически в папке самого BAT-файла.
 
-Поэтому если BIN-файлы лежат в корне репозитория, запускайте из корня:
+Если release BIN лежат в каталоге прошивки, из корня выполните:
 
 ```bat
-tools\make-firmware-hashes.bat
-```
-
-Если BIN-файлы лежат, например, в `firmware\`, сначала перейдите туда и вызовите
-BAT относительным путём:
-
-```bat
-cd firmware
-..\tools\make-firmware-hashes.bat
+cd firmware\KONTAKTS_ESP32_S3_LCD_1_47
+..\..\tools\make-firmware-hashes.bat
 ```
 
 В результате рядом с BIN-файлами будет создан:
@@ -84,22 +88,25 @@ SHA256SUMS.txt
 - [Firmware restore](../docs/firmware-restore.md)
 - [esptool](../docs/esptool.md)
 - [Arduino IDE и BIN-файлы](../docs/arduino-ide.md)
+- [KONTAKTS firmware](../firmware/KONTAKTS_ESP32_S3_LCD_1_47/README.md)
 
 ## Практический короткий цикл
 
-Для обычной работы с уже собранной KONTAKTS firmware удобно держать release BIN
-в отдельной папке, например `firmware\`, и работать из корня репозитория:
+Для обычной работы с уже собранной KONTAKTS firmware удобно хранить release BIN
+рядом с исходным sketch в `firmware\KONTAKTS_ESP32_S3_LCD_1_47\`.
+
+Из корня репозитория прошивка:
 
 ```bat
-tools\flash-merged.bat COM7 firmware\KONTAKTS.merged.bin
+tools\flash-merged.bat COM7 firmware\KONTAKTS_ESP32_S3_LCD_1_47\KONTAKTS_ESP32_S3_LCD_1_47.merged.bin
 ```
 
-Для обновления хешей:
+Обновление хешей:
 
 ```bat
-cd firmware
-..\tools\make-firmware-hashes.bat
+cd firmware\KONTAKTS_ESP32_S3_LCD_1_47
+..\..\tools\make-firmware-hashes.bat
 ```
 
-Так `tools` остаётся папкой инструментов, а готовые BIN и `SHA256SUMS.txt` не
-смешиваются со скриптами.
+Так имена sketch, release BIN и документации совпадают, а `tools` остаётся
+отдельной папкой инструментов.
