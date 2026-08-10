@@ -4,6 +4,31 @@ This directory contains the prebuilt binary image for the hardware-tested,
 locally adapted Waveshare `LVGL_Arduino` example for the
 **Waveshare ESP32-S3-LCD-1.47**.
 
+## Provenance and intended meaning
+
+Within this project we treat this build as **our corrected/adapted version of
+the factory-style demo for this board**: in other words, our reconstruction of
+how we believe that demo is intended to behave on the ESP32-S3-LCD-1.47 after
+the compatibility and reliability problems observed on our physical board are
+removed.
+
+This wording is deliberate. The image published here is **not an original
+Waveshare factory binary and is not byte-identical to the firmware that arrived
+preinstalled on our board**. We do not claim that the actual factory image was
+built from these exact source files.
+
+The project starts from Waveshare's published `LVGL_Arduino` example and keeps
+the recognizable factory-style LVGL panel and vendor provenance, but we made
+explicit local changes during testing. Therefore this binary should be described
+as the **project-maintained adapted Waveshare factory-demo variant**, not as
+"the Waveshare factory firmware".
+
+The factory-installed firmware observed on our particular board showed behavior
+that we considered problematic during testing. This project version intentionally
+differs from that image and incorporates the documented changes below. The goal
+of that statement is provenance clarity, not a claim of official replacement,
+endorsement, or identity with a Waveshare release.
+
 ## Files
 
 - [`ESP32-S3-LCD-1.47-Waveshare-LVGL-adapted.bin`](ESP32-S3-LCD-1.47-Waveshare-LVGL-adapted.bin)
@@ -44,9 +69,14 @@ of which were detected and had their capacities displayed correctly.
 
 This file is **not**:
 
-- the original Waveshare factory firmware;
+- the original Waveshare factory firmware or an official Waveshare release;
+- a byte-for-byte copy of the firmware that arrived preinstalled on our board;
 - the raw 16 MiB factory backup captured from the physical board;
 - the independent `KONTAKTS_ESP32-S3-LCD-1.47` firmware under `firmware/`.
+
+It **is** the project's modified, hardware-tested Waveshare-demo-derived build,
+kept as a reference for what we believe the factory-style demonstration should
+look like and how it should behave on this board after our documented fixes.
 
 It is intentionally stored under `vendor/LVGL_Arduino/firmware/` so the compiled
 vendor-derived adaptation remains clearly separated from independently written
