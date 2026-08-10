@@ -1,6 +1,6 @@
 # USB Army Knife on Waveshare ESP32-S3-LCD-1.47
 
-Status: `REFERENCE_ONLY`
+Status: `BUILD_VERIFIED`
 
 ## Source
 
@@ -12,6 +12,8 @@ Status: `REFERENCE_ONLY`
 - Browser flasher referenced by the video: https://esp.huhn.me/
 - Auxiliary Espressif binary referenced by the video: https://github.com/espressif/arduino-esp32/blob/master/tools/partitions/boot_app0.bin
 - Date accessed: 2026-08-10
+- Locally tested upstream commit: `59db1ba`
+- Build verified: 2026-08-11
 
 ## What this project actually is
 
@@ -124,13 +126,66 @@ The project is substantially more complicated than our current lab firmware. Its
 - FastLED;
 - ESP32 Marauder-derived functionality.
 
-For this reason we should not begin by flashing unknown prebuilt binaries. The preferred research route is to inspect the exact release/build instructions, identify the expected flash layout, then build the Waveshare target locally in our isolated `_local/` research area.
+For this reason we did not begin by flashing an unidentified prebuilt binary. The research route is to build the exact Waveshare target locally, inspect the generated flash layout, then perform controlled hardware verification.
+
+## Local build verification
+
+A clean clone of the upstream repository at commit `59db1ba` was built locally with PlatformIO using exactly:
+
+```powershell
+pio run -e Waveshare-ESP32-S3-LCD-1_47
+```
+
+Result:
+
+```text
+Environment                  Status    Duration
+---------------------------  --------  ------------
+Waveshare-ESP32-S3-LCD-1_47  SUCCESS   00:41:28.760
+1 succeeded
+```
+
+Reported application resource use:
+
+```text
+RAM:   31.5% — 103184 / 327680 bytes
+Flash: 69.9% — 2336381 / 3342336 bytes application partition
+```
+
+The build generated at least:
+
+```text
+bootloader.bin
+partitions.bin
+firmware.elf
+firmware.bin
+```
+
+The first build also installed the project's pinned/declared toolchain and dependencies, including Arduino-ESP32 3.0.5, ESP32 Arduino libraries based on IDF 5.1, TinyUSB, ESPAsyncWebServer, NimBLE-Arduino, LovyanGFX, FastLED and the project's other dependencies.
+
+### Build warnings observed
+
+The build completes successfully but emits multiple warnings. Examples include:
+
+- TinyUSB configuration macros being redefined;
+- deprecated ESPAsyncWebServer APIs;
+- deprecated ArduinoJson compatibility APIs;
+- narrowing conversions in ESP32 Marauder-derived code;
+- one particularly notable compiler warning where `WiFiScan::stringToChar()` returns the address of a local stack buffer.
+
+These warnings do not invalidate the successful build, but they are useful engineering findings and should be reviewed before treating the software as a reference implementation for our own production-quality code.
+
+### Flash-layout check still required before hardware flashing
+
+PlatformIO's informational banner identified the base board definition as an `ESP32-S3-DevKitC-1-N8 (8 MB QD, No PSRAM)`, while the dedicated USB Army Knife Waveshare environment explicitly overrides the flash size to 16 MB.
+
+Because our physical Waveshare board is independently known to have 16 MB Flash and 8 MB PSRAM, we will inspect the generated partition table and flash arguments before writing this image. Hardware status therefore remains **not yet verified**.
 
 ## Security and safety scope for our lab
 
 The upstream software includes offensive-security / red-team capabilities such as HID automation, network emulation and wireless attack tooling.
 
-Our Project Resources investigation is therefore limited to controlled, owned hardware and defensive/educational analysis. The useful engineering questions for this lab are primarily:
+Our Project Resources investigation is limited to controlled, owned hardware and defensive/educational analysis. The useful engineering questions for this lab are primarily:
 
 - how ESP32-S3 native USB composite devices are implemented;
 - how the project switches USB roles;
@@ -142,30 +197,18 @@ Our Project Resources investigation is therefore limited to controlled, owned ha
 
 We do not need to reproduce intrusive payloads to learn these architectural lessons.
 
-## What we should test first
+## Hardware test plan
 
 Before any full application experiment:
 
-1. Clone/download the upstream source into:
+1. Preserve the exact upstream commit used (`59db1ba`).
+2. Inspect the generated partition table and PlatformIO flash arguments.
+3. Confirm the intended 16 MB flash layout despite the generic N8 board banner.
+4. Preserve our current known-good firmware/backup before writing anything.
+5. Prefer the locally built image over an unidentified binary from a video description.
+6. First verify benign functions: boot, display, button, SD and web UI.
 
-```text
-Project Resources/_local/USBArmyKnife/source/
-```
-
-2. Record the exact upstream commit/release used.
-3. Inspect its Waveshare PlatformIO target.
-4. Build only:
-
-```text
-Waveshare-ESP32-S3-LCD-1_47
-```
-
-5. Compare generated flash layout with our known-good 16 MB board configuration.
-6. Preserve our current firmware/backup before writing anything.
-7. Prefer a locally built image over an unidentified binary from a video description.
-8. First verify benign functions: boot, display, button, SD and web UI.
-
-Only after those checks should the status move from `REFERENCE_ONLY` to `BUILD_VERIFIED` or `HARDWARE_VERIFIED`.
+Only after those checks should the status move from `BUILD_VERIFIED` to `HARDWARE_VERIFIED`.
 
 ## What we can learn for our own projects
 
@@ -187,11 +230,17 @@ A device-local web interface is an attractive way to configure a small screen-eq
 
 The use of a browser flasher shows how a finished project can be distributed to non-developers without asking them to install PlatformIO or Arduino IDE. This is directly relevant to a future KONTAKTS web installer.
 
+### E. Build hygiene lessons
+
+The successful build also provides negative lessons for our own codebase: keep dependency versions controlled, minimize avoidable compiler warnings, do not return pointers to stack-local storage, and make physical board memory configuration explicit rather than relying on a generic board banner.
+
 ## Our current conclusion
 
 USB Army Knife is a **high-relevance reference project** because its upstream source directly supports `Waveshare-ESP32-S3-LCD-1_47` and exercises far more of the ESP32-S3 feature set than a simple display demo.
 
-For our purposes, the right first goal is not to copy the project. It is to use it as a case study in:
+Local compilation of the exact Waveshare target is now independently confirmed. The next gate is flash-layout verification, followed by a benign hardware boot/UI/storage test.
+
+For our purposes, the project is a case study in:
 
 ```text
 native USB
