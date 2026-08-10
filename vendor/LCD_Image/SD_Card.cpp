@@ -1,3 +1,21 @@
+/*
+ * Vendor-derived source from the Waveshare ESP32-S3-LCD-1.47 LCD_Image demo.
+ * Original top-level sketch: Copyright (c) 2024 Waveshare, MIT License.
+ * See LCD_Image.ino and LICENSE-MIT.txt for attribution and license text.
+ *
+ * Local compatibility change, hardware-verified with Arduino-ESP32 3.3.11:
+ *   - vendor code used SD_MMC.begin("/sdcard", true, true)
+ *   - this adapted copy uses SD_MMC.begin("/sdcard", false)
+ *
+ * In the current Arduino-ESP32 API, false selects 4-bit SD_MMC mode. The same
+ * 4-bit wiring was independently verified by this project on the physical
+ * Waveshare ESP32-S3-LCD-1.47. The adapted call also avoids automatic
+ * format-on-mount-failure behavior.
+ *
+ * The downloaded vendor example did not expose a readable root directory in
+ * the tested environment until this change was made. This may reflect
+ * dependency/API differences from the original vendor development environment.
+ */
 #include "SD_Card.h"
 
 bool SDCard_Flag;
@@ -7,11 +25,14 @@ uint16_t SDCard_Size;
 uint16_t Flash_Size;
 
 void SD_Init() {
-  // SD MMC
+  // SD MMC pin assignment for the built-in microSD/TF slot.
   if(!SD_MMC.setPins(SD_CLK_PIN, SD_CMD_PIN, SD_D0_PIN, SD_D1_PIN, SD_D2_PIN, SD_D3_PIN)){
     printf("SD MMC: Pin change failed!\r\n");
     return;
   }
+
+  // Local compatibility fix: use the hardware-verified 4-bit configuration.
+  // No automatic formatting is requested if mounting fails.
   if (SD_MMC.begin("/sdcard", false)) {                              
     printf("SD card initialization successful!\r\n");
   } else {
@@ -109,6 +130,8 @@ void remove_file_extension(char *file_name) {
 }
 void Flash_test()
 {
+  // Note: the original vendor source labels this output "RAM Test" even though
+  // it queries Flash size. The wording is intentionally retained as provenance.
   printf("/********** RAM Test**********/\r\n");
   // Get Flash size
   uint32_t flashSize = ESP.getFlashChipSize();
