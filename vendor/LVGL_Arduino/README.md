@@ -31,6 +31,26 @@ individual license headers. This repository therefore preserves the vendor
 provenance at directory level and marks local modifications explicitly instead
 of presenting the adapted files as original Waveshare releases.
 
+### Project interpretation of this demo
+
+For this repository, the adapted build is best understood as **our corrected
+factory-demo variant** for the ESP32-S3-LCD-1.47: a project-maintained version of
+Waveshare's published LVGL demonstration, adjusted according to behavior actually
+observed and tested on our board.
+
+It is **not** the original Waveshare factory firmware, and it is **not claimed to
+be byte-identical to the firmware that arrived preinstalled on the board**. We
+do not claim that the real factory image was compiled from these exact sources.
+
+The visible panel and general demo role remain intentionally recognizable, but
+we changed several parts of the implementation. Therefore references to a
+"factory-style" or "factory-demo" version in this repository mean **our adapted
+version of that demonstration**, not an official Waveshare binary.
+
+The distinction is important for provenance: the project is not presenting its
+modified build as factory firmware. The actual factory image is treated
+separately as a raw backup of the physical board state.
+
 ## Why this copy was adapted
 
 The goal was not to redesign the Waveshare panel. The goal was to get the vendor
@@ -154,10 +174,11 @@ Binary size:
 16777216 bytes
 ```
 
-This binary is the compiled **locally adapted Waveshare LVGL demo**. It is not
-the original Waveshare factory firmware, not the raw factory backup captured
-from a physical board, and not the independent KONTAKTS firmware under the
-repository's top-level `firmware/` directory.
+This binary is the compiled **project-maintained adapted Waveshare factory-demo
+variant**. It is not the original Waveshare factory firmware, not a byte-for-byte
+copy of the firmware that arrived on the board, not the raw factory backup
+captured from the physical board, and not the independent KONTAKTS firmware
+under the repository's top-level `firmware/` directory.
 
 The image is intended to be flashed as a merged image from offset `0x0`:
 
