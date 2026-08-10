@@ -112,7 +112,7 @@ Display: ST7789, 172 x 320
 Arduino IDE: 2.x
 esp32 by Espressif Systems: 3.3.11
 LVGL: 8.3.10
-microSD test card: nominal 16 GB
+microSD cards tested: nominal 16 GB, 32 GB and 64 GB
 ```
 
 Status of this adapted example:
@@ -122,7 +122,9 @@ COMPILES: YES
 LVGL 8.3.10: VERIFIED
 ST7789 output: VERIFIED
 LVGL panel: VERIFIED
-microSD size read: VERIFIED
+microSD 16 GB mount/size display: VERIFIED
+microSD 32 GB mount/size display: VERIFIED
+microSD 64 GB mount/size display: VERIFIED
 Wi-Fi initialization: VERIFIED
 BLE initialization: VERIFIED
 Wi-Fi/BLE scans: NOT USED
@@ -135,6 +137,27 @@ RGB LED loop: VERIFIED AS PART OF THE RUNNING EXAMPLE
 The adapted example running on the physical ESP32-S3-LCD-1.47 is shown here:
 
 **[ESP32-S3-LCD-1.47 — Waveshare LVGL 8.3.10 example](https://youtube.com/shorts/OSkb3rakpZM)**
+
+## microSD capacity verification
+
+The adapted firmware was additionally tested on the same physical board with
+three different nominal microSD capacities:
+
+```text
+16 GB  -> detected and size displayed correctly
+32 GB  -> detected and size displayed correctly
+64 GB  -> detected and size displayed correctly
+```
+
+This verifies the **tested board + adapted 4-bit SD_MMC firmware path** for these
+three card capacities. It supersedes the earlier conservative project assumption
+that only cards up to 16 GB should be treated as verified for this adapted LVGL
+firmware. It does not by itself establish compatibility with every card model,
+filesystem, or capacity above 64 GB.
+
+Video demonstration and hardware confirmation:
+
+**[ESP32-S3-LCD-1.47 — microSD 16/32/64 GB capacity test](https://youtube.com/shorts/tdd-AJH6-_c)**
 
 ## Hardware-verified console output
 
