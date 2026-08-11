@@ -1,15 +1,18 @@
 # Loki Miss Minutes GIF Animation Clock
 
-Status: `NOT_TESTED`
+Status: `HARDWARE_VERIFIED`
+
+Hardware test date: `2026-08-11`
 
 ## Source
 
 - Original project: https://github.com/moononournation/animation_clock
 - Author: moononournation / 陳亮
-- YouTube: https://www.youtube.com/watch?v=e-Z9bq2xT2E
+- Original YouTube: https://www.youtube.com/watch?v=e-Z9bq2xT2E
 - Guide: https://www.instructables.com/GIF-Animation-Clock/
 - Dev Device Pins library: https://github.com/moononournation/Dev_Device_Pins
 - Display library: https://github.com/moononournation/Arduino_GFX
+- LittleFS uploader: https://github.com/earlephilhower/arduino-littlefs-upload
 - Date accessed: 2026-08-11
 - Upstream branch inspected: `main`
 - Exact upstream commit inspected: `c034e2f4eca3ad3c92bc056bc0a4e67fe60bf6b8`
@@ -19,7 +22,7 @@ Status: `NOT_TESTED`
 
 This is a compact animated desk clock inspired by Miss Minutes from Loki. It combines animated GIF playback on the 1.47-inch ST7789 display with a large digital clock synchronized from an NTP server over Wi-Fi.
 
-Compared with the much heavier media-server projects, this is a small and focused embedded application. It is useful for our lab because it demonstrates a clean pattern for:
+Compared with much heavier ESP32 applications, this is a small and focused example. It demonstrates a useful pattern for:
 
 - animated UI on the Waveshare display;
 - storing small assets in internal Flash via LittleFS;
@@ -27,7 +30,7 @@ Compared with the much heavier media-server projects, this is a small and focuse
 - combining animation and overlaid text without LVGL;
 - keeping board-specific display definitions outside the application sketch.
 
-The project is also explicitly listed by Waveshare among third-party project resources for the ESP32-S3-LCD-1.47.
+The project is a particularly good fit for our lab because the author provides an explicit board profile for the Waveshare ESP32-S3-LCD-1.47.
 
 ## What it uses
 
@@ -35,31 +38,29 @@ The project is also explicitly listed by Waveshare among third-party project res
 - Wi-Fi: station mode, used to reach an NTP server
 - Bluetooth: no
 - microSD: no
-- USB: only normal programming/debug path; no custom USB application
+- USB: normal programming/debug path only
 - Buttons/input: not required by the clock application
 - Storage: LittleFS in internal Flash for GIF assets
 - Time source: `pool.ntp.org`
 - Framework: Arduino
 - GIF decoder: bundled `GifClass.h`, based on/reworked from BasementCat `arduino-tft-gif`
-- Board definitions: external `Dev_Device_Pins` library by the same author
+- Board definitions: `Dev_Device_Pins` profile by the same author
 
-## Upstream application flow
-
-The sketch is approximately this simple:
+## Application flow
 
 ```text
 boot
   -> initialize ST7789 display
   -> mount LittleFS
-  -> allocate one indexed GIF frame buffer
+  -> allocate indexed GIF frame buffer
   -> show TVA logo
-  -> play Miss Minutes greeting animation
+  -> play greeting animation
   -> connect Wi-Fi while playing waiting animation
   -> synchronize time from NTP
   -> open walking animation
   -> repeatedly:
        draw HH:MM
-       play one complete Miss Minutes animation
+       play animation
        rewind GIF
 ```
 
@@ -76,7 +77,7 @@ The sketch expects these files in LittleFS:
 /MM_walk.gif
 ```
 
-The upstream repository contains the corresponding files under:
+The upstream repository contains them under:
 
 ```text
 miss_minutes_clock/data/
@@ -84,29 +85,27 @@ miss_minutes_clock/data/
 
 The source comments say the GIFs were optimized with ezgif.com.
 
-The repository README attributes the Miss Minutes GIF sources to Giphy/Marvel/Disney-related source pages. These media assets and character/trademark rights are not ours and should not be copied into this public lab repository.
+The animation artwork and related character/trademark rights belong to their respective rights holders. These media assets are not copied into this public lab repository.
 
 ## Compatibility with Waveshare ESP32-S3-LCD-1.47
 
-Compatibility is unusually good.
+Compatibility is excellent and has now been confirmed on real hardware.
 
-The main sketch contains both board-profile includes:
+The inspected upstream sketch contains both board-profile includes:
 
 ```cpp
 #include "PINS_ESP32-C6-LCD-1_47.h"
 // #include "PINS_ESP32-S3-LCD-1_47.h"
 ```
 
-At the current upstream commit the C6 board is selected by default, but the immediately previous code state selected the S3 profile. Therefore S3 support is clearly intentional rather than an inferred port.
-
-For our board the required change is simply:
+For our board the required change is:
 
 ```cpp
 // #include "PINS_ESP32-C6-LCD-1_47.h"
 #include "PINS_ESP32-S3-LCD-1_47.h"
 ```
 
-The author's current `Dev_Device_Pins` library includes an explicit `PINS_ESP32-S3-LCD-1_47.h` profile with the same hardware mapping we have already confirmed independently:
+The author's `Dev_Device_Pins` library contains the expected mapping for our board:
 
 ```text
 LCD controller: ST7789
@@ -133,25 +132,58 @@ SD D3:          GPIO21
 
 The clock itself does not use the SD interface.
 
-## Required local changes before build
+## Verified installation procedure
 
-### 1. Select our S3 board profile
+The following procedure was actually used successfully on our Waveshare ESP32-S3-LCD-1.47.
 
-Change:
+### 1. Keep the upstream source local
 
-```cpp
-#include "PINS_ESP32-C6-LCD-1_47.h"
-// #include "PINS_ESP32-S3-LCD-1_47.h"
+The original project remains under the ignored research tree:
+
+```text
+Project Resources/_local/animation_clock/
 ```
 
-to:
+The working sketch is:
+
+```text
+animation_clock/miss_minutes_clock/miss_minutes_clock.ino
+```
+
+### 2. Select the S3 board profile
+
+Use:
 
 ```cpp
 // #include "PINS_ESP32-C6-LCD-1_47.h"
 #include "PINS_ESP32-S3-LCD-1_47.h"
 ```
 
-### 2. Enter Wi-Fi credentials
+For our test the matching `PINS_ESP32-S3-LCD-1_47.h` file from `Dev_Device_Pins` was copied directly into the sketch directory so the include resolved without additional Arduino library-path configuration.
+
+### 3. Install Arduino_GFX
+
+Verified in our test:
+
+```text
+Arduino_GFX 1.6.7
+```
+
+The required header must actually exist at something like:
+
+```text
+Arduino_GFX/src/Arduino_GFX_Library.h
+```
+
+A useful practical lesson from this test: a pre-existing but incomplete `Arduino_GFX` directory can look like an installed library while still failing with:
+
+```text
+fatal error: Arduino_GFX_Library.h: No such file or directory
+```
+
+Check the real header file, not just the folder name.
+
+### 4. Enter Wi-Fi credentials locally
 
 Upstream placeholders are:
 
@@ -160,9 +192,9 @@ const char *SSID_NAME = "YourAP";
 const char *SSID_PASSWORD = "PleaseInputYourPasswordHere";
 ```
 
-Replace them locally with the test network credentials. Do not commit real Wi-Fi credentials to the public repository.
+Replace them locally. Do not commit real Wi-Fi credentials to the public repository.
 
-### 3. Set local UTC offset
+### 5. Set the local time offset
 
 Upstream defaults to UTC+8:
 
@@ -170,63 +202,92 @@ Upstream defaults to UTC+8:
 const long gmtOffset_sec = 8 * 60 * 60;
 ```
 
-For UTC+3 use:
+For our UTC+3 test:
 
 ```cpp
 const long gmtOffset_sec = 3 * 60 * 60;
 ```
 
-This implementation uses a fixed offset and has no timezone/DST database. That is acceptable for a fixed-offset clock but less portable than a proper TZ configuration.
+This was verified on hardware. Before correction the clock was exactly five hours ahead; after changing UTC+8 to UTC+3 the displayed time matched local time.
 
-### 4. Install the required Arduino libraries
+The implementation uses a fixed offset and does not provide automatic timezone/DST handling.
 
-The application needs:
+### 6. Select a partition layout with a filesystem partition
+
+The first run inherited an unsuitable partition layout from the previous media-server experiment and produced:
 
 ```text
-GFX Library for Arduino / Arduino_GFX
-Dev Device Pins
+esp_littlefs: partition "spiffs" could not be found
 ```
 
-`LittleFS`, `WiFi` and `WiFiMulti` come from the ESP32 Arduino core.
+The working Arduino IDE choice was:
 
-The GIF decoder is included with the project as `GifClass.h`.
+```text
+Huge APP (3MB No OTA/1MB SPIFFS)
+```
 
-### 5. Upload the LittleFS data folder
+Important detail: the sketch still uses `LittleFS`. In Arduino-ESP32, LittleFS uses the partition label `spiffs` by default, so the partition name in the menu can be confusing. The label does not mean that the sketch is using the old SPIFFS filesystem implementation.
 
-The firmware alone is not sufficient. The four GIF files must be written into LittleFS.
+### 7. Install the LittleFS uploader
 
-The sketch itself points to the Arduino LittleFS upload extension:
+Successfully used:
 
-https://github.com/earlephilhower/arduino-littlefs-upload
+```text
+arduino-littlefs-upload 1.1.8
+```
 
-The expected source folder is:
+After installing the `.vsix` extension and restarting Arduino IDE, the command becomes available through:
+
+```text
+Ctrl + Shift + P
+Upload LittleFS to Pico/ESP8266/ESP32
+```
+
+### 8. Upload the `data` directory
+
+The uploader automatically builds a LittleFS image from:
 
 ```text
 miss_minutes_clock/data/
 ```
 
-The normal workflow is therefore:
+and uploads:
 
 ```text
+MM_hi.gif
+MM_wait.gif
+MM_walk.gif
+TVA_logo.gif
+```
+
+The firmware alone is therefore not a complete installation. The successful workflow is:
+
+```text
+select correct partition scheme
+        +
 upload LittleFS data image
         +
 compile/upload sketch
 ```
 
-## Arduino IDE starting point for our board
+The LittleFS image only needs to be uploaded again when the assets or the filesystem partition layout change.
 
-For the first test we should keep the environment simple and close to our already working S3 setup:
+## Verified Arduino environment
+
+The successful hardware test used:
 
 ```text
-Board:       ESP32S3 Dev Module
-Flash Size:  16MB
-PSRAM:       OPI PSRAM
-CPU:         240MHz
+Board:              ESP32S3 Dev Module
+Arduino-ESP32 core: 3.3.11
+Flash Size:         16MB
+PSRAM:              OPI PSRAM
+CPU Frequency:      240MHz
+Partition Scheme:   Huge APP (3MB No OTA/1MB SPIFFS)
+Arduino_GFX:        1.6.7
+LittleFS uploader:  1.1.8
 ```
 
-This sketch does not need the Nomad-specific TinyUSB/MSC configuration. There is no reason to introduce USB Mass Storage complexity into this test.
-
-We should record the exact Arduino-ESP32 core and Arduino_GFX / Dev Device Pins versions that actually compile successfully rather than assuming the newest versions are automatically correct.
+This sketch does not need the TinyUSB/MSC complexity used by some other projects.
 
 ## Memory model
 
@@ -236,7 +297,7 @@ The code allocates the GIF output buffer as:
 malloc(gfx->width() * gfx->height())
 ```
 
-For the 172 x 320 display this is approximately:
+For the 172 x 320 display:
 
 ```text
 172 x 320 = 55,040 bytes
@@ -244,11 +305,44 @@ For the 172 x 320 display this is approximately:
 
 The buffer is one byte per pixel because the GIF renderer works with palette indexes and Arduino_GFX converts the palette to RGB565 when drawing. This is substantially lighter than a full 16-bit framebuffer for the whole screen.
 
-## Technical observations
+## Local hardware test
 
-### Good points
+Status: `HARDWARE_VERIFIED`
 
-The project is much smaller and easier to reason about than a full media server. There are few moving parts:
+Verified on our real Waveshare ESP32-S3-LCD-1.47:
+
+```text
+PASS  firmware compiles
+PASS  firmware uploads
+PASS  ST7789 initializes correctly
+PASS  display geometry/orientation is usable
+PASS  LittleFS mounts with the correct partition layout
+PASS  all four GIF assets upload through the LittleFS uploader
+PASS  TVA logo displays
+PASS  greeting/waiting/walking animations play
+PASS  Wi-Fi connection works
+PASS  NTP synchronization works
+PASS  HH:MM clock display works
+PASS  UTC+3 correction verified against local time
+```
+
+Observed sequence:
+
+```text
+TVA logo
+-> greeting animation
+-> Wi-Fi/NTP waiting animation
+-> digital HH:MM
+-> repeating walking animation
+```
+
+This is a functional hardware verification, not a long-duration endurance test.
+
+## Impressions after the real test
+
+This project made a very good engineering impression for its scope. It is small enough that failures remain understandable, and the successful path is easy to reproduce once the missing installation details are documented.
+
+The application has only a few important moving parts:
 
 ```text
 Arduino_GFX
@@ -258,70 +352,82 @@ GIF decoder
 board profile
 ```
 
-The external `Dev_Device_Pins` library is a useful architectural idea: the application does not need to contain a second copy of all Waveshare GPIO and ST7789 geometry constants.
+There is no microSD, USB MSC, async web server, background indexing or multi-client media layer. That makes debugging much cleaner than in a full storage/media appliance.
 
-The animation logic also preserves the GIF frame delay rather than blasting frames as quickly as possible.
+The most confusing part was actually the Arduino storage tooling rather than the application itself: `LittleFS` looks for a partition labelled `spiffs`, while the Arduino menu also calls the partition `SPIFFS`. That naming mismatch can make it appear that the sketch is using SPIFFS when it is in fact using LittleFS.
 
-### Limitations
+A second important point is that the asset uploader is part of the real installation. Uploading only the sketch produces an incomplete device. For this class of application, firmware and LittleFS assets should ideally be released together.
 
-The current repository README is extremely minimal and does not document exact library/core versions or a tested release matrix.
-
-There is no explicit project license file visible in the repository, so code reuse terms are not clearly defined. For our purposes the safe approach is study/test/reference unless the author adds a clear license or grants permission.
-
-The clock uses plaintext Wi-Fi credentials in source code. For a demo this is normal, but a reusable product should move credentials into a setup/configuration path or local uncommitted configuration file.
-
-Time zone handling is only a fixed second offset. There is no automatic regional DST handling.
-
-The code stops permanently with `delay(INT_MAX)` if LittleFS or a required GIF cannot be opened. That is acceptable for a small demo but a product-quality application should display a recoverable diagnostic state.
-
-## Comparison with Jcorp Nomad
-
-This is a very different class of project.
+Current assessment:
 
 ```text
-Jcorp Nomad:
-Wi-Fi server + SD filesystem + indexing + streaming + browser + USB MSC
-
-Miss Minutes Clock:
-LittleFS assets + direct LCD rendering + Wi-Fi NTP
+Board compatibility:        10/10
+Ease of understanding:       9/10
+Visual result:               9/10
+Build reproducibility:       8/10 after documenting dependencies
+Operational complexity:      low
+Value as learning example:   high
+Hardware test result:        successful
 ```
 
-Therefore the risk surface is much smaller. There is no SD filesystem mutation, async web server, USB MSC or multi-client media streaming. It should be a much cleaner next hardware test for the Waveshare board.
+## Interesting engineering points
 
-## Local test
+### 1. Animation can represent system state
 
-Status: `NOT_TESTED`
-
-Planned first test:
+The project does not merely loop one decorative GIF. Different animations correspond to different phases:
 
 ```text
-1. obtain upstream source locally under Project Resources/_local/
-2. select PINS_ESP32-S3-LCD-1_47.h
-3. configure temporary Wi-Fi credentials
-4. set UTC offset
-5. install/verify Arduino_GFX and Dev Device Pins
-6. upload LittleFS data
-7. compile/upload firmware
-8. verify display orientation and animation
-9. verify Wi-Fi connection and NTP time
-10. record exact versions and result
+startup / greeting
+waiting for network/time
+normal running animation
 ```
 
-Success criteria:
+That pattern is reusable with original artwork for device states, errors, updates, sensor conditions or agent status.
+
+### 2. Indexed animation is efficient
+
+For a 172 x 320 display, direct indexed bitmap rendering is a good alternative to a full UI framework when the task only needs animation and a few text overlays.
+
+### 3. Internal Flash is enough for small immutable media packs
+
+The four GIF files are small enough that adding an SD card would only increase complexity. LittleFS is a better fit for fixed UI assets.
+
+### 4. Board profiles should be reusable
+
+The author's separate S3 board definition confirms a pattern worth keeping: display geometry, offsets and GPIO mapping should live in a board-support layer rather than inside each application.
+
+### 5. Firmware and assets should be versioned together
+
+A polished release for this type of project should treat:
 
 ```text
-TVA logo visible
--> greeting animation plays
--> waiting animation while Wi-Fi/NTP connects
--> correct HH:MM
--> walking Miss Minutes animation repeats smoothly
+firmware binary
++ LittleFS image
++ partition layout
++ board profile
++ version manifest
 ```
+
+as one release package.
+
+## Limitations
+
+- Upstream README is very minimal and does not document a full tested version matrix.
+- No explicit project license file was found at the time of inspection, so reuse terms are not clearly defined.
+- Wi-Fi credentials are stored in source code.
+- Timezone support is a fixed offset only; no automatic DST handling.
+- Missing LittleFS/assets lead to a hard stop rather than a recoverable diagnostic mode.
+- Distribution is effectively two-part: firmware plus LittleFS assets.
 
 ## Our video
 
-- Video: TODO after hardware verification
+### Hardware verification / final result
 
-The video description must include:
+- Video: https://youtube.com/shorts/ZK_HQWrQ_ig
+- Title: `Loki Miss Minutes Clock на Waveshare ESP32-S3-LCD-1.47 | GIF-анимация + NTP часы`
+- Verification shown: real hardware, GIF animation, Wi-Fi/NTP synchronization and working HH:MM clock.
+
+Useful links for the video description:
 
 ```text
 Original project:
@@ -330,27 +436,32 @@ https://github.com/moononournation/animation_clock
 Original guide:
 https://www.instructables.com/GIF-Animation-Clock/
 
-Original video:
+Original author video:
 https://www.youtube.com/watch?v=e-Z9bq2xT2E
 
 Our ESP32-S3-LCD-1.47 lab:
 https://github.com/AIDevelopersMonster/lab-esp32-s3-lcd-1.47
+
+Our hardware test video:
+https://youtube.com/shorts/ZK_HQWrQ_ig
 ```
 
-## What we can learn from it
+## What we learned
 
-The most reusable engineering ideas are not the Miss Minutes artwork itself but the implementation pattern:
+The most reusable ideas are not the character artwork itself but the implementation pattern:
 
 - keep board-specific GPIO/display geometry in a reusable board profile;
 - use LittleFS for a small immutable asset pack when SD is unnecessary;
 - use indexed/paletted animation to reduce RAM requirements;
-- keep the display pipeline direct and small when LVGL is not needed;
-- synchronize time from NTP instead of adding an RTC when internet/Wi-Fi is acceptable;
-- use a loading animation to make network synchronization visually meaningful instead of freezing the screen.
+- keep the display pipeline direct and small when LVGL is unnecessary;
+- synchronize time from NTP instead of adding an RTC when Wi-Fi is acceptable;
+- use a loading animation to make network synchronization visibly meaningful;
+- document filesystem partition and asset upload as part of firmware installation;
+- verify actual library contents, not merely the presence of a library directory.
 
 ## Own-project ideas inspired by the general principle
 
-This pattern can become a generic `animated appliance display` for our own projects:
+This pattern can become a generic animated appliance display:
 
 ```text
 LittleFS asset pack
@@ -360,7 +471,7 @@ LittleFS asset pack
 + network/device events
 ```
 
-Examples independent of the Loki artwork:
+Possible independent applications:
 
 - animated laboratory clock;
 - animated device status mascot;
@@ -371,4 +482,4 @@ Examples independent of the Loki artwork:
 
 ## Provenance / attribution note
 
-This page documents an independent technical study of the project linked above. The original source code remains attributable to moononournation / 陳亮. Miss Minutes, Loki, TVA and associated artwork/trademarks belong to their respective rights holders. The upstream repository references Giphy sources for the animation assets. No third-party source code or GIF media is included in this public lab repository by this research card.
+This page documents an independent technical study and hardware verification of the project linked above. The original source code remains attributable to moononournation / 陳亮. Character artwork and associated trademarks remain attributable to their respective rights holders. No third-party source code or GIF media is included in this public lab repository by this research card.
