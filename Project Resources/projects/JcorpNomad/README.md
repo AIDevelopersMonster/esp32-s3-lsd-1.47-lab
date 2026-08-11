@@ -1,6 +1,8 @@
 # Jcorp Nomad on Waveshare ESP32-S3-LCD-1.47
 
-Status: `PARTIAL`
+Status: `HARDWARE_SMOKE_VERIFIED`
+
+Deep test status: `DEFERRED`
 
 ## Source
 
@@ -164,6 +166,14 @@ Waveshare ESP32-S3-LCD-1.47
           +-- browser/captive portal
           |
           +-- serves SD content
+```
+
+Default upstream Wi-Fi credentials used in our test:
+
+```text
+SSID:     Jcorp_Nomad
+Password: password
+Address:  http://192.168.4.1/
 ```
 
 The small LCD is best understood as the local status/control surface. The browser is the rich UI.
@@ -664,19 +674,28 @@ The safe current use is:
 
 ## Our video
 
-- Video: TODO after hardware verification
+### Installation and Arduino IDE settings
 
-Future video description should clearly credit the original project:
+- Video: https://youtube.com/shorts/WhyySb5sbPc
+- Title: `Jcorp Nomad on Waveshare ESP32-S3-LCD-1.47 — установка и настройки Arduino IDE`
+- Verification level shown: firmware installation / USB startup / basic hardware smoke test; extended stress and media-library testing deferred.
+
+The video covers the practical installation path and the Arduino IDE configuration used for this board, especially the 16 MB flash layout, OPI PSRAM and TinyUSB settings required for the Nomad USB behavior.
+
+Useful links for the video description:
 
 ```text
-Original project:
+Original Jcorp Nomad project:
 https://github.com/Jstudner/jcorp-nomad
 
-Companion tools:
+Nomad companion tools:
 https://github.com/Jstudner/Nomad-Tools
 
 Our ESP32-S3-LCD-1.47 lab:
 https://github.com/AIDevelopersMonster/lab-esp32-s3-lcd-1.47
+
+Installation/settings video:
+https://youtube.com/shorts/WhyySb5sbPc
 ```
 
 ## Current conclusion
