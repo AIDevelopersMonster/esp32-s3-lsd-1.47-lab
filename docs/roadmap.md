@@ -26,6 +26,10 @@
 - ESP-NOW remote control
 - Sensor and I2C diagnostic tools
 
+## Интересное / разобрать
+
+- [ESPWebTool / esptool.spacehuhn.com](https://esptool.spacehuhn.com/) — разобрать как браузерный инструмент для работы с ESP через Web Serial/WebUSB: возможности прошивки, чтения/записи Flash, поддерживаемые чипы, формат manifest/config и возможность применения или интеграции в наш workflow для ESP32-S3-LCD-1.47.
+
 ## v1.0
 
 - Hardware-tested pin map
