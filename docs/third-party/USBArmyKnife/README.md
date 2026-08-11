@@ -32,6 +32,64 @@ USBArmyKnife уже содержит отдельный профиль для
 **архитектура маленького автономного устройства, которым можно управлять
 скриптами без перекомпиляции firmware**.
 
+## Как подключиться к web UI
+
+В текущем upstream-коде USBArmyKnife Wi-Fi по умолчанию запускается в режиме
+точки доступа.
+
+Заводские/default параметры текущей версии:
+
+```text
+SSID: iPhone14
+Password: password
+IP: 4.3.2.1
+Web UI port: 8080
+```
+
+Порядок подключения:
+
+1. Включить USBArmyKnife и дождаться запуска Wi-Fi.
+2. На компьютере или телефоне открыть список Wi-Fi сетей.
+3. Подключиться к сети `iPhone14`.
+4. Ввести пароль `password`.
+5. Открыть в браузере:
+
+```text
+http://4.3.2.1:8080/
+```
+
+Важно: web UI работает на порту `8080`, поэтому адрес без `:8080` может ничего
+не показать.
+
+Если сеть `iPhone14` не появляется, нужно учитывать, что Wi-Fi параметры
+сохраняются в `Preferences/NVS` и могут отличаться от defaults. Используются
+настройки:
+
+```text
+wifi-ap-mode
+wifi-ap
+wifi-pwd
+wifi-bootstate
+```
+
+По умолчанию:
+
+```text
+wifi-ap-mode = true
+wifi-ap       = iPhone14
+wifi-pwd      = password
+wifi-bootstate= true
+```
+
+Если `wifi-ap-mode=false`, устройство работает как Wi-Fi station и подключается
+к указанной сети. Тогда web UI открывается по IP, который устройство получило
+в этой сети, также на порту `8080`.
+
+> [!WARNING]
+> Пароль `password` — публичное значение по умолчанию. Для постоянной работы
+> лучше задать собственные SSID и пароль, особенно если устройство включается
+> вне изолированной лабораторной среды.
+
 ## Самое полезное для собственных скриптов
 
 ### 1. Управление дисплеем прямо из сценария
@@ -344,7 +402,8 @@ event-driven actions
 - `src/Devices/TFT/HardwareTFT.cpp` — TFT/LovyanGFX и размер текста;
 - `src/Devices/Storage/` — файловое хранилище;
 - `src/Devices/USB/` — USB device abstractions;
-- `src/Devices/WiFi/` — Wi-Fi abstraction;
+- `src/Devices/WiFi/HardwareWiFi.cpp` — Wi-Fi defaults и режим AP/station;
+- `src/Comms/Web/WebServer.cpp` — web UI и порт `8080`;
 - `examples/simple_ui/` — сценарный UI;
 - `examples/progressbar/` — графический прогресс на дисплее;
 - `examples/multiple_keyboard_layouts/` — смена раскладки;
