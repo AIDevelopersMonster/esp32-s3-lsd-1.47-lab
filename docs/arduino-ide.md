@@ -4,19 +4,46 @@
 
 Install **esp32 by Espressif Systems**, version **3.0.2 or newer**.
 
-Use these settings:
+The current Arduino IDE test environment uses **Arduino-ESP32 3.3.11**.
+
+## Current hardware-tested Arduino IDE settings
+
+The following configuration was rechecked on the physical **Waveshare ESP32-S3-LCD-1.47** on 2026-08-12. With these USB settings the COM port remained stable and a continuous `Serial.println()` test worked correctly.
 
 | Option | Value |
 |---|---|
 | Board | ESP32S3 Dev Module |
-| USB Mode | Hardware CDC and JTAG |
-| USB CDC On Boot | Enabled |
-| Flash Size | 16 MB |
+| USB CDC On Boot | **Enabled** |
+| CPU Frequency | 240MHz (WiFi) |
+| Core Debug Level | None |
+| USB DFU On Boot | Disabled |
+| Erase All Flash Before Sketch Upload | Disabled |
+| Events Run On | Core 1 |
+| Flash Mode | QIO 80MHz |
+| Flash Size | 16MB (128Mb) |
+| JTAG Adapter | Disabled |
+| Arduino Runs On | Core 1 |
+| USB Firmware MSC On Boot | Disabled |
+| Partition Scheme | 16M Flash (3MB APP/9.9MB FATFS) |
 | PSRAM | OPI PSRAM |
-| Flash Mode | QIO 80 MHz |
-| Partition Scheme | 16 MB default / suitable 16 MB scheme |
+| Upload Mode | **UART0 / Hardware CDC** |
+| Upload Speed | 921600 |
+| USB Mode | **Hardware CDC and JTAG** |
+| Zigbee Mode | Disabled |
 
-Install these libraries through Library Manager:
+The three USB-related settings that should be kept together for the current tested configuration are:
+
+```text
+USB CDC On Boot: Enabled
+Upload Mode: UART0 / Hardware CDC
+USB Mode: Hardware CDC and JTAG
+```
+
+Do not confuse this with the earlier experimental `USB-OTG CDC (TinyUSB)` / `USB-OTG (TinyUSB)` configuration. The current baseline for this board is **Hardware CDC and JTAG** with **USB CDC On Boot enabled**.
+
+The selected `16M Flash (3MB APP/9.9MB FATFS)` partition scheme describes the ESP32-S3 internal flash layout. It is independent of the removable microSD card and of the board's `SD_MMC` wiring.
+
+Install these libraries through Library Manager for the current KONTAKTS firmware:
 
 - Adafruit GFX Library
 - Adafruit ST7735 and ST7789 Library
