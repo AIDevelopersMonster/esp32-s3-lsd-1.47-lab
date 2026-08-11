@@ -6,6 +6,9 @@
 
 Оригинальный проект: [i-am-shodan/USBArmyKnife](https://github.com/i-am-shodan/USBArmyKnife).
 
+[Видео: установка и запуск USBArmyKnife на Waveshare ESP32-S3-LCD-1.47](https://youtube.com/shorts/E-82xnaAFFY)
+— подтверждение успешной установки и запуска прошивки на реальной плате.
+
 > [!NOTE]
 > USBArmyKnife — security/red-team инструмент. Ниже акцент сделан на безопасных
 > и универсальных механизмах: дисплей, управление состоянием, файлы, USB-режимы,
