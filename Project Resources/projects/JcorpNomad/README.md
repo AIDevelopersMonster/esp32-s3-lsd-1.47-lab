@@ -4,6 +4,8 @@ Status: `HARDWARE_SMOKE_VERIFIED`
 
 Deep test status: `DEFERRED`
 
+Maturity assessment: `BETA / RAW / REPRODUCIBILITY_FRAGILE`
+
 ## Source
 
 - Original project: https://github.com/Jstudner/jcorp-nomad
@@ -205,7 +207,9 @@ MEDIA MODE
            +-- if writes occurred -> reindex required
 ```
 
-This is a particularly good embedded-appliance pattern because it avoids pretending that the ESP32 filesystem view is still valid while a PC has raw block-level ownership of the card.
+This is a particularly good embedded-appliance pattern in principle because it avoids pretending that the ESP32 filesystem view is still valid while a PC has raw block-level ownership of the card.
+
+However, our current hardware test found filesystem corruption symptoms during Nomad evaluation, so USB MSC and all SD-writing paths must currently be treated as experimental until isolated and reproduced. This observation does not prove that USB MSC itself is the root cause; it only means the storage path is not yet trustworthy enough for important data.
 
 ## Companion project: Nomad-Tools
 
@@ -335,21 +339,44 @@ The firmware coordinates shared work with FreeRTOS queues/mutexes and uses bound
 
 ### Overall assessment
 
-For a hobby/open-source ESP32 application, Nomad is unusually complete and technically ambitious.
+For a hobby/open-source ESP32 application, Nomad is unusually complete and technically ambitious. At the same time, our current evaluation indicates that it should still be treated as a raw/beta project rather than a reproducible appliance image.
 
 My current engineering rating as a reference project for our Waveshare board is approximately:
 
 ```text
-Board relevance:             10/10
-Product completeness:         9/10
-Interesting ESP32 usage:      9/10
-Architecture cleanliness:     6/10
-Build reproducibility:        6/10
-Value as a learning source:   9/10
-Value for direct code reuse:  limited by license and architecture
+Board relevance:                     10/10
+Feature/product completeness:         9/10
+Interesting ESP32 usage:              9/10
+Architecture cleanliness:             6/10
+Build reproducibility:                4/10
+Operational robustness as media NAS:  4/10
+Value as a learning source:           9/10
+Value for direct code reuse:          limited by license and architecture
 ```
 
-The strongest part is not any single algorithm. It is the successful integration of many ordinary embedded/web techniques into one usable appliance.
+The strongest part is not any single algorithm. It is the successful integration of many ordinary embedded/web techniques into one ambitious appliance design.
+
+### Current maturity / reproducibility verdict
+
+Our result must not be interpreted as "Nomad does not work". We have directly confirmed that the firmware can compile, flash and boot on the Waveshare ESP32-S3-LCD-1.47, the display starts, the Wi-Fi access point appears, and the browser shell/admin interface can load. Therefore the project is clearly real and substantially functional.
+
+The problem is reproducibility and robustness. Correct behavior appears unusually sensitive to the exact build and runtime environment. The upstream workflow depends on a particular combination of Arduino ESP32 core, board menu options, PSRAM/USB configuration and exact library versions. Other users have reported similar situations where the system boots and presents the UI but media/storage behavior is incomplete or unstable even after apparently correct configuration.
+
+Our current test additionally produced a serious storage symptom: after a microSD card had been freshly formatted and verified under Windows, then inserted into the board and used with Nomad, the browser shell remained available while media directories became empty or unreadable and the FAT filesystem showed corruption. We have not yet isolated the root cause. Possible variables include firmware logic, SD/MMC behavior, library/core version interactions, compilation settings, card/timing sensitivity and potentially host/toolchain/OS-specific interactions. The last category is currently only a possibility, not a demonstrated cause.
+
+Therefore our present classification is:
+
+```text
+NOT: "project is generally non-working"
+YES: "project is currently fragile to reproduce"
+YES: "storage/media path is not trusted in our test"
+YES: "exact build environment matters"
+YES: "project should be treated as beta/raw"
+```
+
+For a file/media server this fragility matters more than for a simple demo. A media appliance should preserve the filesystem first and foremost; successful boot, LCD output and a working web shell are not enough if storage reliability is uncertain.
+
+Upstream also does not currently provide an official precompiled release image/merged `.bin` for this board. That makes it harder to distinguish firmware defects from local compilation/environment differences. A reference binary built by the author would be extremely valuable for diagnosis because it would give users a known-good firmware artifact independent of their Arduino IDE installation.
 
 ### What is standard / expected engineering
 
@@ -389,11 +416,11 @@ For our own systems I would keep this pattern, but add explicit asset-version co
 
 #### 3. Exclusive USB ownership of microSD
 
-The most valuable low-level idea is the clean mode boundary between normal filesystem use and USB MSC block-device access.
+The architectural idea of separating normal filesystem ownership from USB MSC block-device ownership is sound and worth keeping.
 
-A PC mounting the microSD as a raw USB disk and ESP32 simultaneously modifying the same FAT filesystem is unsafe. Nomad instead changes mode, remembers whether the host wrote data, and requests reindexing afterward.
+A PC mounting the microSD as a raw USB disk and ESP32 simultaneously modifying the same FAT filesystem is unsafe. Nomad attempts to separate these modes and remembers whether the host wrote data so that indexing can be refreshed afterward.
 
-That is a pattern worth adopting almost verbatim at the architectural level in our future storage appliances.
+Because our present test encountered filesystem corruption, we should adopt the principle but not copy the current implementation blindly.
 
 #### 4. PC preprocessing + MCU serving
 
@@ -440,11 +467,11 @@ The application entry point should mostly compose services and define state tran
 
 ### 2. Build should be machine-reproducible
 
-Manual Arduino IDE menu settings and manually selected library versions are fragile.
+Manual Arduino IDE menu settings and manually selected library versions are fragile. Our current test shows that this is not merely an inconvenience: when storage, async networking and USB are all involved, version/environment differences can change the observed behavior enough to make diagnosis difficult.
 
 For our own projects I prefer a checked-in reproducible build definition, for example PlatformIO or an equivalent pinned environment, plus a documented generated flash layout.
 
-Arduino IDE can remain an optional user-facing route, but should not be the only authoritative build description.
+A mature release should additionally publish a known-good binary, checksum, exact core/toolchain versions and preferably an automated CI build. Arduino IDE can remain an optional user-facing route, but should not be the only authoritative build description.
 
 ### 3. Board configuration should be a board profile
 
@@ -702,6 +729,8 @@ https://youtube.com/shorts/WhyySb5sbPc
 
 Nomad is valuable not because it contains a mysterious breakthrough algorithm, but because it shows how to turn a very small ESP32-S3 board into a coherent appliance.
 
+At the present stage our conclusion is deliberately two-sided: the project is real, interesting and demonstrably boots on the target hardware, but it is still too sensitive to build/environment details and too uncertain around storage reliability to call it a robust, reproducible media server.
+
 The key lesson is the system composition:
 
 ```text
@@ -717,7 +746,7 @@ native USB
 + physical enclosure
 ```
 
-For our own work, the professional direction is to keep the good system boundaries while improving modularity, reproducible builds, version contracts, diagnostics and recovery.
+For our own work, the professional direction is to keep the good system boundaries while improving modularity, reproducible builds, version contracts, diagnostics, storage safety and recovery.
 
 ## Provenance / attribution
 
