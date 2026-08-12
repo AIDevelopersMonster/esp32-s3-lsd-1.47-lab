@@ -2,6 +2,12 @@
 
 Status: `HARDWARE_VERIFIED`
 
+## Hardware demo
+
+[Waveshare ESP32-S3-LCD-1.47 — MJPEG Video Player hardware demo](https://youtube.com/shorts/Db57oCUU31w)
+
+The video shows the port running on the physical board with automatic MJPEG playback from microSD and BOOT/NEXT control.
+
 ## Source / provenance
 
 - Upstream: https://github.com/thelastoutpostworkshop/ESP32-C6-LCD-1.47_video_player
