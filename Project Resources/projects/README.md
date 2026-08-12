@@ -31,3 +31,11 @@ projects/<short-project-name>/README.md
   - Browser flasher: https://esp.huhn.me/
 
 The `boot_app0.bin` file and browser flasher are classified as supporting installation resources, not separate application projects.
+
+### 02 — ESP32-S3 MJPEG Video Player
+
+- Card: [`ESP32S3VideoPlayer/README.md`](ESP32S3VideoPlayer/README.md)
+- Upstream: https://github.com/thelastoutpostworkshop/ESP32-C6-LCD-1.47_video_player
+- Status: `HARDWARE_VERIFIED`
+- Relevance: **HIGH** — practical SD_MMC + PSRAM + JPEGDEC + ST7789 streaming pipeline, ported and verified on the exact Waveshare ESP32-S3-LCD-1.47.
+- Public S3-only firmware: [`../../firmware/MJPEG_VIDEO_PLAYER_ESP32_S3_LCD_1_47/README.md`](../../firmware/MJPEG_VIDEO_PLAYER_ESP32_S3_LCD_1_47/README.md)

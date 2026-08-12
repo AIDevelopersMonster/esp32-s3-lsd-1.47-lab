@@ -1,5 +1,5 @@
 .pio/
-.vscode/.browse.c_cpp.db*
+.vscode/.browse_c_cpp.db*
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch/
@@ -15,6 +15,10 @@
 # Explicitly allow curated KONTAKTS release BIN files.
 !firmware/KONTAKTS_ESP32_S3_LCD_1_47/release/
 !firmware/KONTAKTS_ESP32_S3_LCD_1_47/release/*.bin
+
+# Explicitly allow curated MJPEG Video Player release BIN files.
+!firmware/MJPEG_VIDEO_PLAYER_ESP32_S3_LCD_1_47/release/
+!firmware/MJPEG_VIDEO_PLAYER_ESP32_S3_LCD_1_47/release/*.bin
 
 backup/
 .DS_Store
